@@ -58,7 +58,7 @@ footer .btn{margin-top:8px}
 
 <h2 id="join">عندك خدمة؟ أضف بياناتك</h2>
 <form id="f">
-<p class="note">التطبيق في بدايته. املأ البيانات وتُراجَع من الإدارة ثم تظهر في التطبيق بعد الموافقة.</p>
+<p class="note">التطبيق في بدايته. املأ البيانات ووتظهر في التطبيق مباشرة بعد الإرسال.</p>
 <label>الاسم<input id="fn" required placeholder="اسمك أو اسم المحل"></label>
 <label>نوع الخدمة<select id="fc" required></select></label>
 <label>رقم الهاتف<input id="fp" required inputmode="tel" placeholder="01xxxxxxxxx"></label>
@@ -134,17 +134,20 @@ $("f").addEventListener("submit",function(e){
   e.preventDefault();
   var b=$("sb"),m=$("msg");b.disabled=true;m.textContent="جاري الإرسال...";
   var d={n:$("fn").value,c:$("fc").value,p:$("fp").value,a:$("fa").value,h:$("fh").value};
+  var digits=d.p.replace(/\D/g,"");
+  if(digits.length<8){m.textContent="اكتب رقم هاتف صحيح.";b.disabled=false;return}
+  try{var last=+localStorage.getItem("lastSend")||0;if(Date.now()-last<60000){m.textContent="انتظر دقيقة قبل إرسال طلب آخر.";b.disabled=false;return}}catch(e){}
   function fallback(){
     var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+d.n+"\nنوع الخدمة: "+d.c+"\nالهاتف: "+d.p+"\nالعنوان: "+d.a+"\nالمواعيد: "+d.h;
     m.textContent="تعذّر الإرسال المباشر. سيتم فتح واتساب لإرسال بياناتك للإدارة.";
     b.disabled=false;
     window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
   }
-  if($("web").value){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";b.disabled=false;return}
-  var body={fields:{n:{stringValue:d.n.slice(0,80)},c:{stringValue:d.c.slice(0,30)},p:{stringValue:d.p.slice(0,20)},a:{stringValue:d.a.slice(0,120)},h:{stringValue:d.h.slice(0,80)},approved:{booleanValue:false},t:{stringValue:new Date().toISOString()}}};
+  if($("web").value){m.textContent="تم الإرسال. أُضيفت بياناتك وستظهر في التطبيق خلال لحظات.";b.disabled=false;return}
+  var body={fields:{n:{stringValue:d.n.slice(0,80)},c:{stringValue:d.c.slice(0,30)},p:{stringValue:d.p.slice(0,20)},a:{stringValue:d.a.slice(0,120)},h:{stringValue:d.h.slice(0,80)},approved:{booleanValue:true},t:{stringValue:new Date().toISOString()}}};
   fetch(FB+"/providers?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
   .then(function(r){
-    if(r.ok){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false}
+    if(r.ok){try{localStorage.setItem("lastSend",String(Date.now()))}catch(e){}m.textContent="تم الإرسال. أُضيفت بياناتك وستظهر في التطبيق خلال لحظات.";load();$("f").reset();b.disabled=false}
     else fallback();
   }).catch(fallback);
 });

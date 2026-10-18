@@ -58,15 +58,13 @@ footer .btn{margin-top:8px}
 
 <h2 id="join">عندك خدمة؟ أضف بياناتك</h2>
 <form id="f">
-<p class="note">التطبيق في بدايته. املأ البيانات وتُراجَع من الإدارة ثم تظهر في التطبيق بعد الموافقة.</p>
+<p class="note">التطبيق في بدايته. املأ البيانات وسيتم إرسالها لإدارة التطبيق على واتساب لإضافتها.</p>
 <label>الاسم<input id="fn" required placeholder="اسمك أو اسم المحل"></label>
 <label>نوع الخدمة<select id="fc" required></select></label>
 <label>رقم الهاتف<input id="fp" required inputmode="tel" placeholder="01xxxxxxxxx"></label>
 <label>العنوان<input id="fa" placeholder="الشارع أو أقرب معلم"></label>
 <label>مواعيد العمل<input id="fh" placeholder="مثال: من ٩ ص إلى ١٠ م"></label>
-<input id="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;right:-9999px;height:1px;width:1px">
-<button class="btn o" id="sb" type="submit">إرسال البيانات</button>
-<p class="note" id="msg" role="status"></p>
+<button class="btn o" type="submit">إرسال عبر واتساب</button>
 </form>
 
 <footer>
@@ -80,15 +78,9 @@ footer .btn{margin-top:8px}
 var ADMIN="201050766025";
 var CATS=["أطباء","صيدليات","سباكة","كهرباء","نجارة","مواصلات","محلات","مطاعم","أخرى"];
 // أضف مقدمي الخدمة هنا: {n:"الاسم",c:"القسم",p:"01xxxxxxxxx",a:"العنوان",h:"المواعيد"}
-var $=function(i){return document.getElementById(i)};
-var API="https://script.google.com/macros/s/AKfycbxY28jCpIc0COfF-EjpSvFRPg3OpupXT9cPKCC1qAGtChSR9iRAvG2IasoyVXizmgk/exec";
 var DATA=[];
-function load(){
-  $("list").innerHTML='<div class="empty">جاري التحميل...</div>';
-  fetch(API).then(function(r){return r.json()}).then(function(d){DATA=Array.isArray(d)?d:[];render()}).catch(function(){DATA=[];render()});
-}
 var cur="الكل";
-
+var $=function(i){return document.getElementById(i)};
 function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 function norm(p){p=String(p||"").replace(/\D/g,"");return p.indexOf("0")===0?"20"+p.slice(1):p}
 function chips(){
@@ -117,13 +109,10 @@ $("chips").addEventListener("click",function(e){
 $("q").addEventListener("input",render);
 $("f").addEventListener("submit",function(e){
   e.preventDefault();
-  var b=$("sb"),m=$("msg");b.disabled=true;m.textContent="جاري الإرسال...";
-  var d={n:$("fn").value,c:$("fc").value,p:$("fp").value,a:$("fa").value,h:$("fh").value,website:$("web").value};
-  fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)})
-  .then(function(){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false})
-  .catch(function(){m.textContent="حصلت مشكلة. جرّب تاني أو تواصل معنا على واتساب.";b.disabled=false});
+  var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+$("fn").value+"\nنوع الخدمة: "+$("fc").value+"\nالهاتف: "+$("fp").value+"\nالعنوان: "+$("fa").value+"\nالمواعيد: "+$("fh").value;
+  window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
 });
-chips();load();
+chips();render();
 </script>
 </body>
 </html>

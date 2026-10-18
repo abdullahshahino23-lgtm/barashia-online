@@ -80,13 +80,27 @@ footer .btn{margin-top:8px}
 var ADMIN="201050766025";
 var CATS=["أطباء","صيدليات","سباكة","كهرباء","نجارة","مواصلات","محلات","مطاعم","أخرى"];
 // أضف مقدمي الخدمة هنا: {n:"الاسم",c:"القسم",p:"01xxxxxxxxx",a:"العنوان",h:"المواعيد"}
-var API="https://script.google.com/macros/s/AKfycbxY28jCpIc0COfF-EjpSvFRPg3OpupXT9cPKCC1qAGtChSR9iRAvG2IasoyVXizmgk/exec";
+var FB="https://firestore.googleapis.com/v1/projects/barashia-online/databases/(default)/documents";
+var KEY="AIzaSyAkTo0Bw-UlRK-6KRzIpaPjJbESufhezeA";
 var STATIC=[
-  {n:"Shahino AI",c:"أخرى",p:"01050766025",a:"شارع البحر",h:"١٢ ص إلى ١٢ م"}
+  {n:"Shahino AI",c:"أخرى",p:"01050766025",a:"شارع البحر",h:"١٢ ص إلى ١٢ م"},
+  {n:"ماركت أولاد ضياء النجار",c:"محلات",p:"01223510363",a:"بجوار محطة الرفع، منزل الحاج رجب طرية",h:"من ٩ صباحًا إلى ٣ بعد منتصف الليل"}
 ];
 var DATA=STATIC.slice();
+function sv(f,k){return f&&f[k]&&f[k].stringValue?f[k].stringValue:""}
 function load(){
-  fetch(API).then(function(r){return r.json()}).then(function(d){DATA=STATIC.concat(Array.isArray(d)?d:[]);render()}).catch(function(){render()});
+  var q={structuredQuery:{from:[{collectionId:"providers"}],where:{fieldFilter:{field:{fieldPath:"approved"},op:"EQUAL",value:{booleanValue:true}}},limit:500}};
+  fetch(FB+":runQuery?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(q)})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    var extra=[];
+    (Array.isArray(d)?d:[]).forEach(function(x){
+      if(x.document){var f=x.document.fields||{};extra.push({n:sv(f,"n"),c:sv(f,"c"),p:sv(f,"p"),a:sv(f,"a"),h:sv(f,"h")})}
+    });
+    var seen={};DATA=[];
+    STATIC.concat(extra).forEach(function(x){var k=x.p+"|"+x.n;if(!seen[k]){seen[k]=1;DATA.push(x)}});
+    render();
+  }).catch(function(){render()});
 }
 var cur="الكل";
 var $=function(i){return document.getElementById(i)};
@@ -120,15 +134,17 @@ $("f").addEventListener("submit",function(e){
   e.preventDefault();
   var b=$("sb"),m=$("msg");b.disabled=true;m.textContent="جاري الإرسال...";
   var d={n:$("fn").value,c:$("fc").value,p:$("fp").value,a:$("fa").value,h:$("fh").value};
-  var q="?action=add&w="+encodeURIComponent($("web").value)+"&n="+encodeURIComponent(d.n)+"&c="+encodeURIComponent(d.c)+"&p="+encodeURIComponent(d.p)+"&a="+encodeURIComponent(d.a)+"&h="+encodeURIComponent(d.h);
   function fallback(){
     var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+d.n+"\nنوع الخدمة: "+d.c+"\nالهاتف: "+d.p+"\nالعنوان: "+d.a+"\nالمواعيد: "+d.h;
     m.textContent="تعذّر الإرسال المباشر. سيتم فتح واتساب لإرسال بياناتك للإدارة.";
     b.disabled=false;
     window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
   }
-  fetch(API+q).then(function(r){return r.json()}).then(function(j){
-    if(j&&j.ok){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false}
+  if($("web").value){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";b.disabled=false;return}
+  var body={fields:{n:{stringValue:d.n.slice(0,80)},c:{stringValue:d.c.slice(0,30)},p:{stringValue:d.p.slice(0,20)},a:{stringValue:d.a.slice(0,120)},h:{stringValue:d.h.slice(0,80)},approved:{booleanValue:false},t:{stringValue:new Date().toISOString()}}};
+  fetch(FB+"/providers?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+  .then(function(r){
+    if(r.ok){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false}
     else fallback();
   }).catch(fallback);
 });

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>البراشية أون لاين</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F1E7;--card:#fff;--ink:#12332B;--mute:#4A5F58;--line:#E4DCCB;--g:#1F6B52;--gt:#fff;--o:#E08A2E;--ot:#12332B;--chip:#DDE9E3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1D19;--card:#172A24;--ink:#EEF3F0;--mute:#A7BAB2;--line:#26413A;--g:#2E8B6B;--gt:#fff;--o:#E8993F;--ot:#12332B;--chip:#1F3A32;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 96px}
+header{background:var(--g);color:var(--gt);margin:0 -16px;padding:22px 20px 24px;border-radius:0 0 26px 26px}
+.top{display:flex;justify-content:space-between;align-items:center}
+h1{margin:0;font-size:26px;font-weight:800}
+.tag{background:var(--o);color:var(--ot);font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px}
+header p{margin:4px 0 14px;font-size:14px;opacity:.92}
+input,select,textarea{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:inherit;font-size:15px;background:var(--card);color:var(--ink)}
+.search{border:0}
+h2{font-size:18px;font-weight:800;margin:22px 0 10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.chip{flex:none;min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;display:flex;gap:12px;align-items:center}
+.av{width:52px;height:52px;border-radius:50%;background:var(--chip);color:var(--g);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex:none}
+.info{flex:1;min-width:0}
+.nm{font-weight:800;font-size:16px}
+.sub{font-size:13px;color:var(--mute)}
+.acts{display:flex;flex-direction:column;gap:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:12px;border:0;font:inherit;font-weight:800;font-size:14px;text-decoration:none;cursor:pointer;background:var(--g);color:var(--gt)}
+.btn.o{background:var(--o);color:var(--ot)}
+.btn.w{background:#1FA855;color:#fff}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:22px;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+form{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600}
+textarea{height:80px;padding:10px 14px}
+.note{font-size:13px;color:var(--mute);margin:0}
+footer{margin-top:22px;text-align:center;font-size:14px;color:var(--mute)}
+footer .btn{margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="top"><h1>البراشية أون لاين</h1><span class="tag">تجريبي</span></div>
+<p>كل مقدمي الخدمات في بلدنا في مكان واحد</p>
+<input class="search" id="q" type="search" placeholder="ابحث عن خدمة أو اسم أو عنوان" aria-label="بحث">
+</header>
+
+<h2>الخدمات</h2>
+<div class="chips" id="chips"></div>
+
+<h2 id="listTitle">كل مقدمي الخدمة</h2>
+<div id="list"></div>
+
+<h2 id="join">عندك خدمة؟ أضف بياناتك</h2>
+<form id="f">
+<p class="note">التطبيق في بدايته. املأ البيانات وتُراجَع من الإدارة ثم تظهر في التطبيق بعد الموافقة.</p>
+<label>الاسم<input id="fn" required placeholder="اسمك أو اسم المحل"></label>
+<label>نوع الخدمة<select id="fc" required></select></label>
+<label>رقم الهاتف<input id="fp" required inputmode="tel" placeholder="01xxxxxxxxx"></label>
+<label>العنوان<input id="fa" placeholder="الشارع أو أقرب معلم"></label>
+<label>مواعيد العمل<input id="fh" placeholder="مثال: من ٩ ص إلى ١٠ م"></label>
+<input id="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;right:-9999px;height:1px;width:1px">
+<button class="btn o" id="sb" type="submit">إرسال البيانات</button>
+<p class="note" id="msg" role="status"></p>
+</form>
+
+<footer>
+<div>للتواصل مع إدارة التطبيق واتساب</div>
+<div dir="ltr" style="font-weight:800;font-size:18px;color:var(--ink)">01050766025</div>
+<a class="btn w" href="https://wa.me/201050766025" target="_blank" rel="noopener">تواصل على واتساب</a>
+</footer>
+</div>
+
+<script>
+var ADMIN="201050766025";
+var CATS=["أطباء","صيدليات","سباكة","كهرباء","نجارة","مواصلات","محلات","مطاعم","أخرى"];
+// أضف مقدمي الخدمة هنا: {n:"الاسم",c:"القسم",p:"01xxxxxxxxx",a:"العنوان",h:"المواعيد"}
+var $=function(i){return document.getElementById(i)};
+var API="https://script.google.com/macros/s/AKfycbxY28jCpIc0COfF-EjpSvFRPg3OpupXT9cPKCC1qAGtChSR9iRAvG2IasoyVXizmgk/exec";
+var DATA=[];
+function load(){
+  $("list").innerHTML='<div class="empty">جاري التحميل...</div>';
+  fetch(API).then(function(r){return r.json()}).then(function(d){DATA=Array.isArray(d)?d:[];render()}).catch(function(){DATA=[];render()});
+}
+var cur="الكل";
+
+function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+function norm(p){p=String(p||"").replace(/\D/g,"");return p.indexOf("0")===0?"20"+p.slice(1):p}
+function chips(){
+  var h=["الكل"].concat(CATS).map(function(c){return '<button class="chip" type="button" aria-pressed="'+(c===cur)+'" data-c="'+c+'">'+c+'</button>'}).join("");
+  $("chips").innerHTML=h;
+  $("fc").innerHTML=CATS.map(function(c){return "<option>"+c+"</option>"}).join("");
+}
+function render(){
+  var q=$("q").value.trim();
+  var r=DATA.filter(function(x){
+    return (cur==="الكل"||x.c===cur)&&(!q||(x.n+" "+x.c+" "+(x.a||"")).indexOf(q)>-1);
+  });
+  $("listTitle").textContent=cur==="الكل"?"كل مقدمي الخدمة":cur;
+  if(!r.length){
+    $("list").innerHTML='<div class="empty"><b>لسه مفيش بيانات هنا</b>كن أول من يضيف خدمته في هذا القسم.<br><a class="btn o" style="margin-top:12px" href="#join">أضف بياناتك</a></div>';
+    return;
+  }
+  $("list").innerHTML=r.map(function(x){
+    return '<div class="card"><div class="av">'+esc(x.n).charAt(0)+'</div><div class="info"><div class="nm">'+esc(x.n)+'</div><div class="sub">'+esc(x.c)+(x.a?" • "+esc(x.a):"")+'</div>'+(x.h?'<div class="sub">'+esc(x.h)+'</div>':"")+'</div><div class="acts"><a class="btn" href="tel:'+esc(x.p)+'">اتصل</a><a class="btn w" target="_blank" rel="noopener" href="https://wa.me/'+norm(x.p)+'">واتساب</a></div></div>';
+  }).join("");
+}
+$("chips").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-c]");if(!b)return;
+  cur=b.getAttribute("data-c");chips();render();
+});
+$("q").addEventListener("input",render);
+$("f").addEventListener("submit",function(e){
+  e.preventDefault();
+  var b=$("sb"),m=$("msg");b.disabled=true;m.textContent="جاري الإرسال...";
+  var d={n:$("fn").value,c:$("fc").value,p:$("fp").value,a:$("fa").value,h:$("fh").value,website:$("web").value};
+  fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)})
+  .then(function(){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false})
+  .catch(function(){m.textContent="حصلت مشكلة. جرّب تاني أو تواصل معنا على واتساب.";b.disabled=false});
+});
+chips();load();
+
+});
+$("q").addEventListener("input",render);
+$("f").addEventListener("submit",function(e){
+  e.preventDefault();
+  var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+$("fn").value+"\nنوع الخدمة: "+$("fc").value+"\nالهاتف: "+$("fp").value+"\nالعنوان: "+$("fa").value+"\nالمواعيد: "+$("fh").value;
+  window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
+});
+chips();render();
+</script>
+</body>
+</html>

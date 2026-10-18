@@ -124,15 +124,6 @@ $("f").addEventListener("submit",function(e){
   .catch(function(){m.textContent="حصلت مشكلة. جرّب تاني أو تواصل معنا على واتساب.";b.disabled=false});
 });
 chips();load();
-
-});
-$("q").addEventListener("input",render);
-$("f").addEventListener("submit",function(e){
-  e.preventDefault();
-  var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+$("fn").value+"\nنوع الخدمة: "+$("fc").value+"\nالهاتف: "+$("fp").value+"\nالعنوان: "+$("fa").value+"\nالمواعيد: "+$("fh").value;
-  window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
-});
-chips();render();
 </script>
 </body>
 </html>

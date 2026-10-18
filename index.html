@@ -58,13 +58,15 @@ footer .btn{margin-top:8px}
 
 <h2 id="join">عندك خدمة؟ أضف بياناتك</h2>
 <form id="f">
-<p class="note">التطبيق في بدايته. املأ البيانات وسيتم إرسالها لإدارة التطبيق على واتساب لإضافتها.</p>
+<p class="note">التطبيق في بدايته. املأ البيانات وتُراجَع من الإدارة ثم تظهر في التطبيق بعد الموافقة.</p>
 <label>الاسم<input id="fn" required placeholder="اسمك أو اسم المحل"></label>
 <label>نوع الخدمة<select id="fc" required></select></label>
 <label>رقم الهاتف<input id="fp" required inputmode="tel" placeholder="01xxxxxxxxx"></label>
 <label>العنوان<input id="fa" placeholder="الشارع أو أقرب معلم"></label>
 <label>مواعيد العمل<input id="fh" placeholder="مثال: من ٩ ص إلى ١٠ م"></label>
-<button class="btn o" type="submit">إرسال عبر واتساب</button>
+<input id="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;right:-9999px;height:1px;width:1px">
+<button class="btn o" id="sb" type="submit">إرسال البيانات</button>
+<p class="note" id="msg" role="status"></p>
 </form>
 
 <footer>
@@ -78,7 +80,14 @@ footer .btn{margin-top:8px}
 var ADMIN="201050766025";
 var CATS=["أطباء","صيدليات","سباكة","كهرباء","نجارة","مواصلات","محلات","مطاعم","أخرى"];
 // أضف مقدمي الخدمة هنا: {n:"الاسم",c:"القسم",p:"01xxxxxxxxx",a:"العنوان",h:"المواعيد"}
-var DATA=[];
+var API="https://script.google.com/macros/s/AKfycbxY28jCpIc0COfF-EjpSvFRPg3OpupXT9cPKCC1qAGtChSR9iRAvG2IasoyVXizmgk/exec";
+var STATIC=[
+  {n:"Shahino AI",c:"أخرى",p:"01050766025",a:"شارع البحر",h:"١٢ ص إلى ١٢ م"}
+];
+var DATA=STATIC.slice();
+function load(){
+  fetch(API).then(function(r){return r.json()}).then(function(d){DATA=STATIC.concat(Array.isArray(d)?d:[]);render()}).catch(function(){render()});
+}
 var cur="الكل";
 var $=function(i){return document.getElementById(i)};
 function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
@@ -109,10 +118,21 @@ $("chips").addEventListener("click",function(e){
 $("q").addEventListener("input",render);
 $("f").addEventListener("submit",function(e){
   e.preventDefault();
-  var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+$("fn").value+"\nنوع الخدمة: "+$("fc").value+"\nالهاتف: "+$("fp").value+"\nالعنوان: "+$("fa").value+"\nالمواعيد: "+$("fh").value;
-  window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
+  var b=$("sb"),m=$("msg");b.disabled=true;m.textContent="جاري الإرسال...";
+  var d={n:$("fn").value,c:$("fc").value,p:$("fp").value,a:$("fa").value,h:$("fh").value};
+  var q="?action=add&w="+encodeURIComponent($("web").value)+"&n="+encodeURIComponent(d.n)+"&c="+encodeURIComponent(d.c)+"&p="+encodeURIComponent(d.p)+"&a="+encodeURIComponent(d.a)+"&h="+encodeURIComponent(d.h);
+  function fallback(){
+    var t="طلب إضافة بيانات في البراشية أون لاين\nالاسم: "+d.n+"\nنوع الخدمة: "+d.c+"\nالهاتف: "+d.p+"\nالعنوان: "+d.a+"\nالمواعيد: "+d.h;
+    m.textContent="تعذّر الإرسال المباشر. سيتم فتح واتساب لإرسال بياناتك للإدارة.";
+    b.disabled=false;
+    window.open("https://wa.me/"+ADMIN+"?text="+encodeURIComponent(t),"_blank");
+  }
+  fetch(API+q).then(function(r){return r.json()}).then(function(j){
+    if(j&&j.ok){m.textContent="تم الإرسال. سيظهر اسمك بعد موافقة الإدارة.";$("f").reset();b.disabled=false}
+    else fallback();
+  }).catch(fallback);
 });
-chips();render();
+chips();render();load();
 </script>
 </body>
 </html>

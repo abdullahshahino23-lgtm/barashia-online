@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>API - البراشية أون لاين</title>
+<style>
+:root{--bg:#fff;--ink:#12332B}@media (prefers-color-scheme:dark){:root{--bg:#0F1D19;--ink:#EEF3F0;color-scheme:dark}}
+body{margin:0;padding:12px;background:var(--bg);color:var(--ink);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace}
+pre{white-space:pre-wrap;word-break:break-word;margin:0}
+</style>
+</head>
+<body>
+<pre id="o">loading...</pre>
+<script>
+/* الاستخدام:
+   api.html?r=providers | offers | news | reviews | all
+   إضافة &img=1 لإظهار الصور (ثقيلة). النتيجة JSON تتحدّث تلقائيًا بأي تعديل من الأدمن. */
+var FB="https://firestore.googleapis.com/v1/projects/barashia-online/databases/(default)/documents";
+var KEY="AIzaSyAkTo0Bw-UlRK-6KRzIpaPjJbESufhezeA";
+var P=new URLSearchParams(location.search),R=P.get("r")||"all",IMG=P.get("img")==="1";
+var C={providers:"providers",offers:"offers",news:"news",reviews:"reviews"};
+function V(v){if(v.stringValue!=null)return v.stringValue;if(v.integerValue!=null)return +v.integerValue;if(v.doubleValue!=null)return v.doubleValue;if(v.booleanValue!=null)return v.booleanValue;return null}
+function Q(c){return fetch(FB+":runQuery?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({structuredQuery:{from:[{collectionId:c}],where:{fieldFilter:{field:{fieldPath:"approved"},op:"EQUAL",value:{booleanValue:true}}},limit:1000}})}).then(function(r){if(!r.ok)throw new Error(c+" HTTP "+r.status);return r.json()}).then(function(d){return d.filter(function(x){return x.document}).map(function(x){var o={id:x.document.name.split("/").pop()},f=x.document.fields||{};Object.keys(f).forEach(function(k){if(k==="approved"||(k==="img"&&!IMG))return;o[k]=V(f[k])});return o})})}
+var keys=R==="all"?Object.keys(C):(C[R]?[R]:[]);
+if(!keys.length)document.getElementById("o").textContent=JSON.stringify({error:"use ?r=providers|offers|news|reviews|all"},null,2);
+else Promise.all(keys.map(Q)).then(function(a){var o={};keys.forEach(function(k,i){o[k]=a[i]});document.getElementById("o").textContent=JSON.stringify(R==="all"?o:o[R],null,2)}).catch(function(e){document.getElementById("o").textContent=JSON.stringify({error:e.message})});
+</script>
+</body>
+</html>

@@ -38,7 +38,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 .msgs{max-height:40vh;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--card);margin:8px 0}
 .m{max-width:85%;padding:8px 12px;border-radius:14px;margin-bottom:8px;font-size:14px;white-space:pre-wrap;word-break:break-word;background:var(--chip)}
 .m.u{background:var(--g);color:var(--gt);margin-inline-start:auto}
-#msg{min-height:22px;font-size:14px;color:var(--mute)}
+#msg{min-height:22px;font-size:14px;color:var(--mute)}#msg:not(:empty){position:fixed;inset-inline:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;text-align:center;z-index:50}.dm{margin:0 0 8px;font-weight:600}
 footer{margin-top:24px;text-align:center}
 .fab{position:fixed;inset-inline-start:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .tabs{display:flex;gap:8px;margin:6px 0 10px}.tabs .chip{flex:1}.th{width:64px;height:64px;border-radius:14px;object-fit:cover;flex:none;background:var(--chip)}.pr{font-weight:800;font-size:18px}details summary{cursor:pointer;color:var(--mute);font-size:14px}[hidden]{display:none!important}
@@ -73,6 +73,7 @@ footer{margin-top:24px;text-align:center}
   <label>الاسم<input id="rn" maxlength="40"></label>
   <label>التقييم<select id="rs"><option value="5">★★★★★ ممتاز</option><option value="4">★★★★ جيد جدًا</option><option value="3">★★★ جيد</option><option value="2">★★ مقبول</option><option value="1">★ سيئ</option></select></label>
   <label>تعليقك<textarea id="rx" maxlength="300"></textarea></label>
+  <p class="dm sub" role="status"></p>
   <div class="row"><button class="btn" type="submit">إرسال التقييم</button><button class="btn s" type="button" data-close>إلغاء</button></div></form></dialog>
 
 <dialog id="da"><h2>أضف خدمتك</h2><form id="af">
@@ -86,6 +87,7 @@ footer{margin-top:24px;text-align:center}
   <label>رابط فيسبوك (اختياري)<input id="afb" inputmode="url" maxlength="200"></label>
   <label>صورة أو لوجو (اختياري)<input id="aimg" type="file" accept="image/*"></label>
   <label>هل تقدم خدمة توصيل؟<select id="ahv"><option value="0">لا</option><option value="1">نعم</option></select></label>
+  <p class="dm sub" role="status"></p>
   <div class="row"><button class="btn o" type="submit">إرسال البيانات</button><button class="btn s" type="button" data-close>إلغاء</button></div></form></dialog>
 
 <dialog id="dd"><h2>طلب توصيل</h2><p class="sub" id="dinfo"></p><form id="df">
@@ -94,6 +96,7 @@ footer{margin-top:24px;text-align:center}
   <label>العنوان بالتفصيل<input id="dad" required maxlength="120"></label>
   <label>تفاصيل الطلب<textarea id="dx" required maxlength="300"></textarea></label>
   <p class="pr">رسوم التوصيل: ١٥ جنيه</p>
+  <p class="dm sub" role="status"></p>
   <div class="row"><button class="btn o" type="submit">تأكيد طلب التوصيل</button><button class="btn s" type="button" data-close>إلغاء</button></div></form></dialog>
 <dialog id="dof"><h2>أضف عرضك</h2><form id="of">
   <label>نوع العرض<select id="otype"><option value="sell">بيع</option><option value="buy">شراء (مطلوب)</option></select></label>
@@ -103,9 +106,11 @@ footer{margin-top:24px;text-align:center}
   <label>اسمك<input id="on" required maxlength="40"></label>
   <label>رقم الهاتف<input id="op" required inputmode="tel" maxlength="20"></label>
   <label>صورة المنتج (اختياري)<input id="oimg" type="file" accept="image/*"></label>
+  <p class="dm sub" role="status"></p>
   <div class="row"><button class="btn o" type="submit">إرسال العرض</button><button class="btn s" type="button" data-close>إلغاء</button></div></form></dialog>
 <dialog id="dc"><div class="row" style="justify-content:space-between"><h2>محادثة مع الإدارة</h2><button class="btn s" type="button" data-close>إغلاق</button></div>
   <div class="msgs" id="cm"></div>
+  <p class="dm sub" role="status"></p>
   <label>اسمك (اختياري)<input id="cn" maxlength="40"></label>
   <div class="row"><input id="cr" maxlength="500" placeholder="اكتب رسالتك" style="flex:1"><button class="btn" id="cs" type="button">إرسال</button></div></dialog>
 
@@ -117,7 +122,7 @@ var items=[],rv={},cat="",pid=null,timer=null,cid=null;
 var $=function(i){return document.getElementById(i)};
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
 function att(s){return esc(s).replace(/"/g,"&quot;")}
-function say(t){$("msg").textContent=t||""}
+var _t;function say(t){t=t||"";$("msg").textContent=t;Array.prototype.forEach.call(document.querySelectorAll(".dm"),function(x){x.textContent=""});var o=document.querySelector("dialog[open] .dm");if(o)o.textContent=t;clearTimeout(_t);if(t)_t=setTimeout(function(){$("msg").textContent=""},9000)}
 function sv(f,k){return f&&f[k]&&f[k].stringValue!=null?f[k].stringValue:""}
 function nv(f,k){if(!f||!f[k])return null;var v=f[k];if(v.doubleValue!=null)return +v.doubleValue;if(v.integerValue!=null)return +v.integerValue;return null}
 function S(v,n){return {stringValue:String(v==null?"":v).slice(0,n)}}
@@ -125,7 +130,7 @@ function norm(s){return String(s||"").replace(/[٠-٩]/g,function(d){return d.ch
 function okPhone(p){return /^\+?\d{8,15}$/.test(p)}
 function wa(p){var d=norm(p).replace(/\D/g,"");return d.indexOf("0")===0?"20"+d.slice(1):d}
 function runQ(parent,q){return fetch(FB+(parent||"")+":runQuery?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({structuredQuery:q})}).then(function(r){if(!r.ok)throw new Error("q");return r.json()}).then(function(d){return (Array.isArray(d)?d:[]).filter(function(x){return x.document}).map(function(x){return x.document})})}
-function post(path,f){return fetch(FB+path+"?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})})}
+function post(path,f){return fetch(FB+path+"?key="+KEY,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})}).then(function(r){if(!r.ok)r.clone().json().then(function(j){var e=j&&j.error||{};say("رفض Firebase الطلب ("+r.status+" "+(e.status||"")+") "+(e.message||"").slice(0,120))}).catch(function(){});return r})}
 function patch(path,f,m){return fetch(FB+path+"?key="+KEY+m.map(function(k){return "&updateMask.fieldPaths="+k}).join(""),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})})}
 function ok(){return {fieldFilter:{field:{fieldPath:"approved"},op:"EQUAL",value:{booleanValue:true}}}}
 function throttle(k){var n=Date.now(),l=+(localStorage.getItem(k)||0);if(n-l<60000){say("انتظر دقيقة قبل الإرسال مرة أخرى.");return false}localStorage.setItem(k,String(n));return true}

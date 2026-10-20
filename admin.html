@@ -157,7 +157,7 @@ $("lf").addEventListener("submit",function(e){
   fetch(AUTH,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("em").value.trim(),password:$("pw").value,returnSecureToken:true})})
   .then(function(r){return r.json()}).then(function(j){
     if(j.idToken){tok=j.idToken;rtok=j.refreshToken;$("pw").value="";$("lf").classList.add("hide");$("app").classList.remove("hide");say("");loadAll()}
-    else say("بيانات الدخول غير صحيحة.");
+    else{var m=(j.error&&j.error.message)||"",c={EMAIL_NOT_FOUND:"البريد غير مسجل في Firebase.",INVALID_PASSWORD:"كلمة المرور غير صحيحة.",INVALID_LOGIN_CREDENTIALS:"البريد أو كلمة المرور غير صحيحة، أو الحساب غير موجود.",OPERATION_NOT_ALLOWED:"الدخول بالبريد وكلمة المرور غير مفعّل في Firebase.",USER_DISABLED:"الحساب معطّل.",TOO_MANY_ATTEMPTS_TRY_LATER:"محاولات كثيرة، انتظر قليلًا ثم حاول."};say((c[m.split(" ")[0]]||"فشل الدخول")+(m?" ("+m+")":""))}
   }).catch(function(){say("تعذّر الاتصال.")});
 });
 $("out").addEventListener("click",function(){tok=rtok=null;clearInterval(timer);$("app").classList.add("hide");$("lf").classList.remove("hide");say("")});

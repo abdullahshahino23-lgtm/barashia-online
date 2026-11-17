@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'ADMIN_EMAIL';
+    }
+    function d() { return request.resource.data; }
+
+    // مقدمو الخدمة
+    match /providers/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create: if isAdmin() || (
+        d().approved == false &&
+        d().keys().hasOnly(['n','c','p','w','a','h','d','fb','img','hv','t','approved']) &&
+        d().n is string && d().n.size() > 0 && d().n.size() <= 80 &&
+        d().p is string && d().p.size() <= 20 &&
+        d().d.size() <= 300 && d().img.size() <= 200000);
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // التقييمات
+    match /reviews/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create: if d().approved == false &&
+        d().keys().hasOnly(['pid','n','s','x','t','approved']) &&
+        d().s is int && d().s >= 1 && d().s <= 5 &&
+        d().x.size() <= 300 && d().n.size() <= 40;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // طلبات التوصيل
+    match /orders/{id} {
+      allow create: if d().st == 'جديد' && d().fee == 15 &&
+        d().keys().hasOnly(['k','pid','pn','cn','cp','ca','x','pr','fee','st','t']) &&
+        d().cp.size() <= 20 && d().ca.size() <= 120 && d().x.size() <= 300;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // السوق (بيع وشراء)
+    match /offers/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create: if d().approved == false &&
+        d().keys().hasOnly(['k','n','pr','d','cn','p','img','approved','t']) &&
+        d().k in ['sell','buy'] && d().pr is number && d().pr >= 0 &&
+        d().n.size() <= 80 && d().d.size() <= 300 && d().img.size() <= 200000;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // المحادثات
+    match /chats/{cid} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() || (d().from == 'user' && d().last.size() <= 200);
+      allow delete: if false;
+
+      match /messages/{mid} {
+        allow read: if true;
+        allow create: if isAdmin() || (d().from == 'user' && d().x.size() <= 500);
+        allow update, delete: if false;
+      }
+    }
+  }
+}

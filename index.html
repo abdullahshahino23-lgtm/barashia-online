@@ -99,6 +99,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
 
 <main id="v_home">
   <input id="hq" type="search" placeholder="ابحث عن خدمة أو اسم أو عنوان..." aria-label="بحث" style="margin-top:14px">
+<button class="btn o" id="addhome" type="button" style="width:100%;margin-top:10px">＋ أضف خدمتك مجانًا</button>
   <div class="emg"><span class="sub" style="align-self:center;flex:none">🚨 طوارئ:</span><a href="tel:122">الشرطة 122</a><a href="tel:123">الإسعاف 123</a><a href="tel:180">المطافئ 180</a></div>
   <div id="ann"></div>
   <h2>الأقسام</h2>
@@ -111,6 +112,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <div>للتواصل مع إدارة التطبيق واتساب</div>
     <div dir="ltr" style="font-weight:800;font-size:18px;color:var(--ink)">01050766025</div>
     <a class="btn w" style="margin-top:8px" href="https://wa.me/201050766025" target="_blank" rel="noopener">تواصل على واتساب</a>
+    <div style="margin-top:12px"><a href="admin.html" style="color:var(--mute)">لوحة التحكم</a></div>
   </footer>
 </main>
 
@@ -292,6 +294,7 @@ function byNew(a,b){return a.t<b.t?1:a.t>b.t?-1:0}
 /* الرئيسية */
 function renderHome(){
   var cats=allCats(),cnt={};P.forEach(function(x){cnt[x.c]=(cnt[x.c]||0)+1});
+  cats.sort(function(a,b){return (cnt[b]||0)-(cnt[a]||0)});
   var list=st.all?cats:cats.slice(0,8);
   $("grid").innerHTML=list.map(function(c){return '<button class="tile" type="button" data-cat="'+esc(c)+'"><div class="i">'+icon(c)+'</div><div class="l">'+esc(c)+'</div><div class="c">'+(cnt[c]||0)+'</div></button>'}).join("");
   $("gmore").textContent=st.all?"إخفاء ▴":"كل الأقسام ▾";
@@ -301,6 +304,7 @@ function renderHome(){
 $("grid").addEventListener("click",function(e){var b=e.target.closest("button[data-cat]");if(!b)return;st.cat=b.getAttribute("data-cat");st.page=1;view("dir")});
 $("gmore").addEventListener("click",function(){st.all=!st.all;renderHome()});
 $("allbtn").addEventListener("click",function(){st.cat="";st.page=1;view("dir")});
+$("addhome").addEventListener("click",openJoin);
 $("hq").addEventListener("keydown",function(e){if(e.key==="Enter"){st.q=$("hq").value.trim();$("dq").value=st.q;st.cat="";st.page=1;view("dir")}});
 
 /* الخدمات */

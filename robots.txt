@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://abdullahshahino23-lgtm.github.io/barashia-online/sitemap.xml

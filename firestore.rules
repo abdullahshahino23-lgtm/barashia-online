@@ -78,6 +78,19 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // مفقودات وموجودات
+    match /lostfound/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create: if isAdmin() || (
+        d().approved == false &&
+        d().keys().hasOnly(['k','ti','x','cn','p','img','t','approved']) &&
+        d().k in ['lost','found'] &&
+        d().ti is string && d().ti.size() > 0 && d().ti.size() <= 80 &&
+        d().x.size() <= 300 && d().cn.size() <= 60 && d().p.size() <= 20 &&
+        d().img.size() <= 200000);
+      allow update, delete: if isAdmin();
+    }
+
     // الأرقام المهمة
     match /numbers/{id} {
       allow read: if isAdmin() || resource.data.approved == true;

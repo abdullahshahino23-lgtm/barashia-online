@@ -102,6 +102,11 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
 <button class="btn o" id="addhome" type="button" style="width:100%;margin-top:10px">＋ أضف خدمتك مجانًا</button>
   <div class="emg"><span class="sub" style="align-self:center;flex:none">🚨 طوارئ:</span><a href="tel:122">الشرطة 122</a><a href="tel:123">الإسعاف 123</a><a href="tel:180">المطافئ 180</a></div>
   <div id="ann"></div>
+  <div class="box" style="margin-top:12px">
+    <div class="row" style="justify-content:space-between"><b>🕌 مواقيت الصلاة</b><span class="sub" id="praynext"></span></div>
+    <div class="row" id="praytimes" style="justify-content:space-between;margin-top:8px;text-align:center"></div>
+    <div class="sub" id="prayloc" style="margin-top:6px"></div>
+  </div>
   <div class="row" style="margin-top:14px">
     <button class="btn o" id="pfb" type="button" style="flex:1">🏷️ إعلان مدفوع — 100 جنيه</button>
   </div>
@@ -137,6 +142,20 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <label>رابط صورة (اختياري)<input id="oimg" maxlength="500" inputmode="url" placeholder="https://..."></label>
     <button class="btn" type="submit" id="osb">إرسال العرض</button>
     <div class="sub" style="margin-top:6px">العرض بيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
+  </form>
+  <h2>🔍 مفقودات وموجودات</h2>
+  <div id="lf"></div>
+  <button class="btn" id="lfb" type="button" style="width:100%;margin-top:8px">＋ أضف مفقود أو موجود</button>
+  <form id="lff" class="box hide" style="margin-top:10px">
+    <label>النوع<select id="lfk"><option value="lost">مفقود (ضاع مني)</option><option value="found">موجود (لقيته)</option></select></label>
+    <label>إيه الحاجة؟ *<input id="lfti" required maxlength="80" placeholder="مثال: محفظة سودا / مفتاح عربية"></label>
+    <label>التفاصيل<textarea id="lfx" maxlength="300" placeholder="أوصافها، وضاعت أو لقيتها فين وإمتى"></textarea></label>
+    <label>اسمك *<input id="lfcn" required maxlength="60"></label>
+    <label>رقم التليفون *<input id="lfp" required inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx"></label>
+    <label>صورة (اختياري)<input id="lfimgf" type="file" accept="image/*"></label>
+    <img id="lfimgp" alt="" style="display:none;width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin:6px 0">
+    <button class="btn" type="submit" id="lfsb">إرسال</button>
+    <div class="sub" style="margin-top:6px">بيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
   </form>
   <h2>الأقسام</h2>
   <div class="grid" id="grid"></div>
@@ -236,7 +255,8 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <label>مواعيد العمل<input id="fh" maxlength="80" placeholder="مثال: من ٩ ص إلى ١٠ م"></label>
     <label>وصف الخدمة<textarea id="fd" maxlength="300" placeholder="نبذة قصيرة عن خدمتك وأسعارك"></textarea></label>
     <label>رابط صفحة فيسبوك (اختياري)<input id="ffb" maxlength="200" inputmode="url" placeholder="https://facebook.com/..."></label>
-    <label>رابط صورة (اختياري)<input id="fimg" maxlength="500" inputmode="url" placeholder="https://..."></label>
+    <label>صورة الخدمة (اختياري)<input id="fimgf" type="file" accept="image/*"></label>
+    <img id="fimgp" alt="" style="display:none;width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin:6px 0">
     <label style="flex-direction:row;align-items:center;gap:8px"><input id="fhv" type="checkbox" style="width:22px;min-height:22px"> أقدّم خدمة منزلية أو توصيل</label>
     <div class="row"><button class="btn s" id="loc" type="button">📍 تحديد موقعي على الخريطة</button><span class="note" id="locm"></span></div>
     <input id="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;right:-9999px;height:1px;width:1px;min-height:1px">
@@ -285,7 +305,7 @@ function withLegacy(list){
   return list.concat(LEGACY.filter(function(x){return !have[x.p.replace(/\D/g,"")]}));
 }
 
-var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],OFF=[],loaded=PDB.length>0;
+var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],OFF=[],LF=[],loaded=PDB.length>0;
 var st={cat:"",sort:"new",fav:false,q:"",page:1,all:false,me:null};
 var FAV=jget("fav",[]),timer=null,pend={lat:null,lng:null};
 var PAGE=15;
@@ -322,6 +342,9 @@ function loadAll(){
   runQ("",onlyOn("offers",100)).then(function(ds){
     OFF=ds.map(function(d){var f=d.fields||{};return {n:sv(f,"n"),pr:nv(f,"pr")||0,d:sv(f,"d"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t")}});
   }).catch(function(){}).then(renderOffers);
+  runQ("",onlyOn("lostfound",100)).then(function(ds){
+    LF=ds.map(function(d){var f=d.fields||{};return {k:sv(f,"k"),ti:sv(f,"ti"),x:sv(f,"x"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t")}});
+  }).catch(function(){}).then(renderLF);
 }
 function skel(n){var h="";for(var i=0;i<n;i++)h+='<div class="skel"></div>';return h}
 
@@ -344,6 +367,7 @@ function cardHtml(x){
   '<div class="sub">'+esc(x.c)+(x.a?' • '+esc(x.a):'')+km+'</div>'+
   '<div class="sub">'+(a.c?'<span class="st">'+stars(a.a)+'</span> '+a.a.toFixed(1)+' ('+a.c+')':'لا توجد تقييمات بعد')+'</div></div>'+
   '<button class="heart'+(fv?' on':'')+'" data-fav="'+esc(x.id)+'" type="button" aria-label="مفضلة">'+(fv?'♥':'♡')+'</button>'+
+  '<a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(x.n+" - "+x.c+"\n📞 "+x.p+"\n"+SITE)+'" data-stop="1">مشاركة</a>'+
   '<a class="btn" href="tel:'+esc(x.p)+'" data-stop="1">اتصل</a></div></div>';
 }
 function byNew(a,b){return a.t<b.t?1:a.t>b.t?-1:0}
@@ -458,22 +482,24 @@ $("sheet").addEventListener("click",function(e){
 });
 
 /* إضافة خدمة */
+var fimg="";
+$("fimgf").addEventListener("change",function(){var f=this.files[0];fimg="";$("fimgp").style.display="none";if(f)shrink(f,320,function(d){fimg=d;if(d){$("fimgp").src=d;$("fimgp").style.display="block"}})});
 function openJoin(){renderChips();$("joinov").classList.remove("hide");$("joinov").scrollTop=0}
 $("jx").addEventListener("click",function(){$("joinov").classList.add("hide")});
 $("loc").addEventListener("click",function(){geo(function(a,b){pend.lat=a;pend.lng=b;$("locm").textContent="تم تحديد الموقع ✓"})});
 $("f").addEventListener("submit",function(e){
   e.preventDefault();
   var b=$("sb");b.disabled=true;
-  var d={n:$("fn").value.trim(),c:$("fc").value,p:$("fp").value.trim(),w:$("fw").value.trim(),a:$("fa").value.trim(),h:$("fh").value.trim(),d:$("fd").value.trim(),fb:$("ffb").value.trim(),img:$("fimg").value.trim()};
+  var d={n:$("fn").value.trim(),c:$("fc").value,p:$("fp").value.trim(),w:$("fw").value.trim(),a:$("fa").value.trim(),h:$("fh").value.trim(),d:$("fd").value.trim(),fb:$("ffb").value.trim(),img:fimg};
   if(d.p.replace(/\D/g,"").length<8){toast("اكتب رقم هاتف صحيح.");b.disabled=false;return}
   if(d.fb&&!safeUrl(d.fb)){toast("رابط فيسبوك لازم يبدأ بـ https://");b.disabled=false;return}
-  if(d.img&&!safeUrl(d.img)){toast("رابط الصورة لازم يبدأ بـ https://");b.disabled=false;return}
+  if(d.img.length>200000){toast("الصورة كبيرة جدًا، جرّب صورة أصغر.");b.disabled=false;return}
   if($("web").value){toast("تم الإرسال.");b.disabled=false;return}
   if(Date.now()-(+ls("lastSend")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");b.disabled=false;return}
-  var f={n:S(d.n,80),c:S(d.c,30),p:S(d.p,20),w:S(d.w,20),a:S(d.a,120),h:S(d.h,80),d:S(d.d,300),fb:S(d.fb,200),img:S(d.img,500),hv:{booleanValue:$("fhv").checked},approved:{booleanValue:false},t:S(now(),40)};
+  var f={n:S(d.n,80),c:S(d.c,30),p:S(d.p,20),w:S(d.w,20),a:S(d.a,120),h:S(d.h,80),d:S(d.d,300),fb:S(d.fb,200),img:S(d.img,200000),hv:{booleanValue:$("fhv").checked},approved:{booleanValue:false},t:S(now(),40)};
   if(pend.lat!=null){f.lat={doubleValue:pend.lat};f.lng={doubleValue:pend.lng}}
   post("/providers",f).then(function(r){
-    if(r.ok){ls("lastSend",String(Date.now()));toast("تم استلام خدمتك ✅ هتظهر بعد مراجعة الإدارة");$("f").reset();pend={lat:null,lng:null};$("locm").textContent="";$("joinov").classList.add("hide");loadAll()}
+    if(r.ok){ls("lastSend",String(Date.now()));toast("تم استلام خدمتك ✅ هتظهر بعد مراجعة الإدارة");$("f").reset();fimg="";$("fimgp").style.display="none";pend={lat:null,lng:null};$("locm").textContent="";$("joinov").classList.add("hide");loadAll()}
     else fb2();
     b.disabled=false;
   }).catch(fb2);
@@ -554,6 +580,38 @@ $("tgoal").addEventListener("click",function(){tb.g=(tb.g+1)%GOALS.length;tbSave
 $("dhikrs").addEventListener("click",function(e){var b=e.target.closest("[data-d]");if(!b)return;tb.d=+b.getAttribute("data-d");tb.c=0;tbSave();tbChips();tbRender()});
 tbChips();tbRender();
 
+/* مواقيت الصلاة */
+var PRAY=[["Fajr","الفجر"],["Dhuhr","الظهر"],["Asr","العصر"],["Maghrib","المغرب"],["Isha","العشاء"]];
+var prayT=null;
+function prayRender(){
+  if(!prayT)return;
+  var nowD=new Date(),mins=nowD.getHours()*60+nowD.getMinutes(),next=-1;
+  var html=PRAY.map(function(p,i){
+    var t=prayT[p[0]]||"",hm=t.slice(0,5),mm=(+hm.slice(0,2))*60+(+hm.slice(3,5));
+    if(next<0&&mm>mins)next=i;
+    return '<div style="flex:1"><div class="sub">'+p[1]+'</div><b>'+esc(hm)+'</b></div>';
+  }).join("");
+  $("praytimes").innerHTML=html;
+  if(next<0){$("praynext").textContent="الصلاة القادمة: الفجر غدًا"}
+  else{var hm2=(prayT[PRAY[next][0]]||"").slice(0,5),mm2=(+hm2.slice(0,2))*60+(+hm2.slice(3,5)),df=mm2-mins;
+    $("praynext").textContent="القادمة: "+PRAY[next][1]+" "+hm2+" (بعد "+Math.floor(df/60)+":"+String(df%60).padStart(2,"0")+")"}
+}
+function prayFetch(lat,lng,label){
+  var d=new Date(),ds=String(d.getDate()).padStart(2,"0")+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+d.getFullYear();
+  var ck="pray_"+ds+"_"+lat.toFixed(2)+"_"+lng.toFixed(2),cached=null;
+  try{cached=JSON.parse(ls(ck)||"null")}catch(e){}
+  $("prayloc").textContent=label;
+  if(cached){prayT=cached;prayRender();return}
+  fetch("https://api.aladhan.com/v1/timings/"+ds+"?latitude="+lat+"&longitude="+lng+"&method=5").then(function(r){return r.json()}).then(function(j){
+    if(j&&j.data&&j.data.timings){prayT=j.data.timings;ls(ck,JSON.stringify(prayT));prayRender()}
+  }).catch(function(){});
+}
+function prayInit(){
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){prayFetch(p.coords.latitude,p.coords.longitude,"حسب موقعك الحالي")},function(){prayFetch(30.0444,31.2357,"القاهرة — فعّل الموقع لمواقيت أدق")},{timeout:4000})}
+  else prayFetch(30.0444,31.2357,"القاهرة");
+}
+prayInit();setInterval(prayRender,60000);
+
 /* الإعلانات والمناسبات */
 function shrink(f,max,cb){var r=new FileReader();r.onload=function(){var i=new Image();i.onload=function(){var k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.7))};i.onerror=function(){cb("")};i.src=r.result};r.readAsDataURL(f)}
 var pimg="";
@@ -597,6 +655,32 @@ $("of").addEventListener("submit",function(e){
   b.disabled=true;
   post("/offers",{k:S("sell",10),n:S($("on").value.trim(),80),pr:{doubleValue:parseFloat($("opr").value)||0},d:S($("od").value.trim(),300),cn:S($("ocn").value.trim(),60),p:S(ph,20),img:S(img,500),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
     if(r.ok){ls("lastOffer",String(Date.now()));toast("تم استلام عرضك ✅ هيظهر بعد مراجعة الإدارة");$("of").reset();$("of").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
+});
+
+/* مفقودات وموجودات */
+function renderLF(){
+  var a=LF.slice().sort(function(m,n){return m.t<n.t?1:-1}).slice(0,10);
+  $("lf").innerHTML=a.length?a.map(function(x){
+    return '<div class="ann '+(x.k==="found"?"f":"t")+'"><div class="ty">'+(x.k==="found"?"✅ موجود":"🔍 مفقود")+'</div><div class="ti">'+esc(x.ti)+'</div>'+
+    (x.img?'<img src="'+esc(x.img)+'" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:6px 0">':'')+
+    (x.x?'<div>'+esc(x.x)+'</div>':'')+
+    '<div class="sub">'+esc(x.cn)+(x.p?' • <a href="tel:'+esc(x.p)+'">'+esc(x.p)+'</a>':'')+'</div></div>';
+  }).join(""):'<div class="sub">لا توجد مفقودات أو موجودات حاليًا.</div>';
+}
+var lfimg="";
+$("lfimgf").addEventListener("change",function(){var f=this.files[0];lfimg="";$("lfimgp").style.display="none";if(f)shrink(f,800,function(d){lfimg=d;if(d){$("lfimgp").src=d;$("lfimgp").style.display="block"}})});
+$("lfb").addEventListener("click",function(){$("lff").classList.toggle("hide")});
+$("lff").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("lfsb");
+  var ph=$("lfp").value.trim();
+  if(ph.replace(/\D/g,"").length<8){toast("اكتب رقم تليفون صحيح.");return}
+  if(lfimg.length>200000){toast("الصورة كبيرة جدًا، جرّب صورة أصغر.");return}
+  if(Date.now()-(+ls("lastLF")||0)<60000){toast("انتظر دقيقة قبل إرسال آخر.");return}
+  b.disabled=true;
+  post("/lostfound",{k:S($("lfk").value,10),ti:S($("lfti").value.trim(),80),x:S($("lfx").value.trim(),300),cn:S($("lfcn").value.trim(),60),p:S(ph,20),img:S(lfimg,200000),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastLF",String(Date.now()));toast("تم الاستلام ✅ هيظهر بعد مراجعة الإدارة");$("lff").reset();lfimg="";$("lfimgp").style.display="none";$("lff").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
     b.disabled=false;
   }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
 });

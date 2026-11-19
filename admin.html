@@ -62,6 +62,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <button class="tab" data-t="m" aria-pressed="false" type="button">العروض</button>
     <button class="tab" data-t="u" aria-pressed="false" type="button">مقترحات</button>
     <button class="tab" data-t="e" aria-pressed="false" type="button">الإعلانات</button>
+    <button class="tab" data-t="l" aria-pressed="false" type="button">مفقودات</button>
     <button class="tab" data-t="s" aria-pressed="false" type="button">إحصائيات</button>
   </div>
 
@@ -102,6 +103,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     </form>
     <div id="elist"></div>
   </section>
+  <section id="tl" class="hide"><div id="llist"></div></section>
   <section id="ts" class="hide"><div id="stats"></div><div class="row"><button class="btn s" id="exp" type="button">تصدير مقدمي الخدمة CSV</button></div></section>
 
   <section id="ta" class="hide">
@@ -294,7 +296,7 @@ $("csend").addEventListener("click",function(){
 $("tabs").addEventListener("click",function(e){
   var b=e.target.closest("button[data-t]");if(!b)return;tab=b.getAttribute("data-t");
   Array.prototype.forEach.call($("tabs").children,function(c){c.setAttribute("aria-pressed",String(c===b))});
-  ["p","r","c","a","s","o","m","u","e"].forEach(function(k){$("t"+k).classList.toggle("hide",k!==tab)});
+  ["p","r","c","a","s","o","m","u","e","l"].forEach(function(k){$("t"+k).classList.toggle("hide",k!==tab)});
   if(tab!=="c"){clearInterval(timer)}
 });
 
@@ -323,7 +325,7 @@ $("imp").addEventListener("click",function(){
 });
 
 function badges(){
-  var L={p:["مقدمو الخدمة",items.filter(function(x){return !x.on}).length],r:["التقييمات",revs.filter(function(x){return !x.on}).length],o:["الطلبات",orders.filter(function(x){return x.st==="جديد"}).length],m:["العروض",offers.filter(function(x){return !x.on}).length],u:["مقترحات",suggestions.length],c:["المحادثات",chats.filter(function(x){return x.from==="user"}).length]};
+  var L={p:["مقدمو الخدمة",items.filter(function(x){return !x.on}).length],r:["التقييمات",revs.filter(function(x){return !x.on}).length],o:["الطلبات",orders.filter(function(x){return x.st==="جديد"}).length],m:["العروض",offers.filter(function(x){return !x.on}).length],u:["مقترحات",suggestions.length],c:["المحادثات",chats.filter(function(x){return x.from==="user"}).length],l:["مفقودات",lostf.filter(function(x){return !x.on}).length]};
   Array.prototype.forEach.call($("tabs").children,function(b){var l=L[b.getAttribute("data-t")];if(l)b.textContent=l[0]+(l[1]?" ("+l[1]+")":"")});
 }
 function renderS(){
@@ -348,6 +350,7 @@ function byT(a,b){return a.t<b.t?1:a.t>b.t?-1:0}
 function loadX(){loadY();
   runQ("",{from:[{collectionId:"orders"}],limit:500}).then(function(ds){orders=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),pn:sv(f,"pn"),cn:sv(f,"cn"),cp:sv(f,"cp"),ca:sv(f,"ca"),x:sv(f,"x"),pr:nv(f,"pr")||0,fee:nv(f,"fee")||15,st:sv(f,"st")||"جديد",t:sv(f,"t")}}).sort(byT);renderO();badges()}).catch(function(){});
   runQ("",{from:[{collectionId:"offers"}],limit:500}).then(function(ds){offers=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),n:sv(f,"n"),pr:nv(f,"pr")||0,d:sv(f,"d"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderK();badges()}).catch(function(){});
+  runQ("",{from:[{collectionId:"lostfound"}],limit:500}).then(function(ds){lostf=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),ti:sv(f,"ti"),x:sv(f,"x"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderL();badges()}).catch(function(){});
 }
 var STS=["جديد","جاري التوصيل","تم التسليم","ملغي"];
 function renderO(){
@@ -372,7 +375,18 @@ function renderK(){
 }
 $("mlist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=offers.filter(function(i){return i.id===id})[0];
   if(b.getAttribute("data-a")==="del"){delDoc("/offers/"+id,"حذف العرض نهائيًا؟",loadAll);return}say("جاري التنفيذ...");patch("/offers/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderK();badges()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
-var suggestions=[],news=[];
+var suggestions=[],news=[],lostf=[];
+function renderL(){
+  if(!lostf.length){$("llist").innerHTML='<div class="box sub">لا توجد مفقودات أو موجودات.</div>';return}
+  $("llist").innerHTML=lostf.map(function(x){
+    return '<div class="box"><div class="row" style="justify-content:space-between"><span class="nm">'+esc(x.ti)+'</span><span class="tag'+(x.on?"":" off")+'">'+(x.k==="found"?"موجود":"مفقود")+' • '+(x.on?"ظاهر":"مخفي")+'</span></div>'+
+    (x.img?'<img src="'+att(x.img)+'" alt="" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin:6px 0">':'')+
+    (x.x?'<div>'+esc(x.x)+'</div>':'')+'<div class="sub">'+esc(x.cn)+' • '+esc(x.p)+'</div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn s" data-id="'+att(x.id)+'" type="button">'+(x.on?"إخفاء":"إظهار")+'</button><button class="btn d" data-a="del" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>';
+  }).join("");
+}
+$("llist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=lostf.filter(function(i){return i.id===id})[0];
+  if(b.getAttribute("data-a")==="del"){delDoc("/lostfound/"+id,"حذف نهائيًا؟",loadX);return}say("جاري التنفيذ...");patch("/lostfound/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderL();badges()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
 function delDoc(path,msg,cb){if(!confirm(msg))return;say("جاري الحذف...");rm(FB+path).then(function(r){if(r.ok){say("تم الحذف.");cb()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})}
 function loadY(){
   runQ("",{from:[{collectionId:"suggestions"}],limit:500}).then(function(ds){suggestions=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),c:sv(f,"c"),ti:sv(f,"ti"),x:sv(f,"x"),t:sv(f,"t")}}).sort(byT);renderU();badges()}).catch(function(){});

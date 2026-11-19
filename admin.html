@@ -373,11 +373,11 @@ $("mlist").addEventListener("click",function(e){var b=e.target.closest("button[d
 var suggestions=[],news=[];
 function delDoc(path,msg,cb){if(!confirm(msg))return;say("جاري الحذف...");rm(FB+path).then(function(r){if(r.ok){say("تم الحذف.");cb()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})}
 function loadY(){
-  runQ("",{from:[{collectionId:"suggestions"}],limit:500}).then(function(ds){suggestions=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),p:sv(f,"p"),x:sv(f,"x"),t:sv(f,"t")}}).sort(byT);renderU();badges()}).catch(function(){});
+  runQ("",{from:[{collectionId:"suggestions"}],limit:500}).then(function(ds){suggestions=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),c:sv(f,"c"),ti:sv(f,"ti"),x:sv(f,"x"),t:sv(f,"t")}}).sort(byT);renderU();badges()}).catch(function(){});
   runQ("",{from:[{collectionId:"news"}],limit:200}).then(function(ds){news=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),n:sv(f,"n"),d:sv(f,"d"),dt:sv(f,"dt"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderE()}).catch(function(){});
 }
 function renderU(){
-  $("ulist").innerHTML=suggestions.length?suggestions.map(function(x){return '<div class="box"><div><b>'+esc(x.n||"بدون اسم")+'</b>'+(x.p?' • <a href="tel:'+att(x.p)+'">'+esc(x.p)+'</a>':'')+'</div><div>'+esc(x.x)+'</div><div class="sub">'+esc(x.t.slice(0,16).replace("T"," "))+'</div><div class="row" style="margin-top:8px"><button class="btn d" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>'}).join(""):'<div class="box sub">لا توجد مقترحات.</div>';
+  $("ulist").innerHTML=suggestions.length?suggestions.map(function(x){return '<div class="box"><div><b>'+esc(x.ti||"مقترح")+'</b></div><div class="sub">'+esc(x.c)+' • '+esc(x.n||"بدون اسم")+'</div><div>'+esc(x.x)+'</div><div class="sub">'+esc(x.t.slice(0,16).replace("T"," "))+'</div><div class="row" style="margin-top:8px"><button class="btn d" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>'}).join(""):'<div class="box sub">لا توجد مقترحات.</div>';
 }
 $("ulist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(b)delDoc("/suggestions/"+b.getAttribute("data-id"),"حذف المقترح؟",loadY)});
 var KN={wedding:"أفراح",death:"وفاة",event:"مناسبة"};

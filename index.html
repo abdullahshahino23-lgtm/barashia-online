@@ -184,6 +184,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <label>مواعيد العمل<input id="fh" maxlength="80" placeholder="مثال: من ٩ ص إلى ١٠ م"></label>
     <label>وصف الخدمة<textarea id="fd" maxlength="300" placeholder="نبذة قصيرة عن خدمتك وأسعارك"></textarea></label>
     <label>رابط صفحة فيسبوك (اختياري)<input id="ffb" maxlength="200" inputmode="url" placeholder="https://facebook.com/..."></label>
+    <label>رابط صورة (اختياري)<input id="fimg" maxlength="500" inputmode="url" placeholder="https://..."></label>
     <label style="flex-direction:row;align-items:center;gap:8px"><input id="fhv" type="checkbox" style="width:22px;min-height:22px"> أقدّم خدمة منزلية أو توصيل</label>
     <div class="row"><button class="btn s" id="loc" type="button">📍 تحديد موقعي على الخريطة</button><span class="note" id="locm"></span></div>
     <input id="web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;right:-9999px;height:1px;width:1px;min-height:1px">
@@ -407,15 +408,16 @@ $("loc").addEventListener("click",function(){geo(function(a,b){pend.lat=a;pend.l
 $("f").addEventListener("submit",function(e){
   e.preventDefault();
   var b=$("sb");b.disabled=true;
-  var d={n:$("fn").value.trim(),c:$("fc").value,p:$("fp").value.trim(),w:$("fw").value.trim(),a:$("fa").value.trim(),h:$("fh").value.trim(),d:$("fd").value.trim(),fb:$("ffb").value.trim()};
+  var d={n:$("fn").value.trim(),c:$("fc").value,p:$("fp").value.trim(),w:$("fw").value.trim(),a:$("fa").value.trim(),h:$("fh").value.trim(),d:$("fd").value.trim(),fb:$("ffb").value.trim(),img:$("fimg").value.trim()};
   if(d.p.replace(/\D/g,"").length<8){toast("اكتب رقم هاتف صحيح.");b.disabled=false;return}
   if(d.fb&&!safeUrl(d.fb)){toast("رابط فيسبوك لازم يبدأ بـ https://");b.disabled=false;return}
+  if(d.img&&!safeUrl(d.img)){toast("رابط الصورة لازم يبدأ بـ https://");b.disabled=false;return}
   if($("web").value){toast("تم الإرسال.");b.disabled=false;return}
   if(Date.now()-(+ls("lastSend")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");b.disabled=false;return}
-  var f={n:S(d.n,80),c:S(d.c,30),p:S(d.p,20),w:S(d.w,20),a:S(d.a,120),h:S(d.h,80),d:S(d.d,300),fb:S(d.fb,200),hv:{booleanValue:$("fhv").checked},approved:{booleanValue:true},t:S(now(),40)};
+  var f={n:S(d.n,80),c:S(d.c,30),p:S(d.p,20),w:S(d.w,20),a:S(d.a,120),h:S(d.h,80),d:S(d.d,300),fb:S(d.fb,200),img:S(d.img,500),hv:{booleanValue:$("fhv").checked},approved:{booleanValue:false},t:S(now(),40)};
   if(pend.lat!=null){f.lat={doubleValue:pend.lat};f.lng={doubleValue:pend.lng}}
   post("/providers",f).then(function(r){
-    if(r.ok){ls("lastSend",String(Date.now()));toast("تم! أُضيفت خدمتك وستظهر خلال لحظات ✅");$("f").reset();pend={lat:null,lng:null};$("locm").textContent="";$("joinov").classList.add("hide");loadAll()}
+    if(r.ok){ls("lastSend",String(Date.now()));toast("تم استلام خدمتك ✅ هتظهر بعد مراجعة الإدارة");$("f").reset();pend={lat:null,lng:null};$("locm").textContent="";$("joinov").classList.add("hide");loadAll()}
     else fb2();
     b.disabled=false;
   }).catch(fb2);

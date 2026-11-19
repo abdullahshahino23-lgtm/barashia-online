@@ -113,6 +113,8 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <label>التاريخ والموعد<input id="adt" maxlength="100" placeholder="مثال: الجمعة القادمة بعد العصر"></label>
     <label>المكان<input id="apl" maxlength="100" placeholder="مثال: قاعة النور"></label>
     <label>يظهر حتى تاريخ (اختياري)<input id="au" type="date"></label>
+    <label>صورة البوستر (اختياري)<input id="aimgf" type="file" accept="image/*"></label>
+    <img id="aimgp" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:6px 0">
     <button class="btn" type="submit" id="asb">إرسال الإعلان</button>
     <div class="sub" style="margin-top:6px">الإعلان مجاني، وبيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
   </form>
@@ -122,6 +124,8 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <label>العنوان / المكان<input id="ppl" maxlength="100"></label>
     <label>يظهر حتى تاريخ (اختياري)<input id="pu" type="date"></label>
     <label>اسمك ورقم تليفونك للتواصل *<input id="pcn" required maxlength="60" placeholder="الاسم — رقم التليفون"></label>
+    <label>صورة البوستر (اختياري)<input id="pimgf" type="file" accept="image/*"></label>
+    <img id="pimgp" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:6px 0">
     <button class="btn o" type="submit" id="psb">إرسال طلب الإعلان</button>
     <div class="sub" style="margin-top:6px">سعر الإعلان 100 جنيه. بعد الإرسال هتظهر لك طريقة الدفع، والإعلان بيظهر بعد تأكيد الدفع ومراجعة الإدارة.</div>
     <div id="paybox" class="hide" style="margin-top:10px;border:1px dashed var(--line);border-radius:14px;padding:12px">
@@ -325,7 +329,7 @@ function loadAll(){
   runQ("",onlyOn("providers",1000)).then(function(ds){PDB=mapP(ds);P=withLegacy(PDB.slice());ls("c_p",JSON.stringify(PDB.slice(0,300)))}).catch(function(){}).then(function(){loaded=true;renderAll()});
   runQ("",onlyOn("reviews",3000)).then(function(ds){RV={};ds.forEach(function(d){var f=d.fields||{},pid=sv(f,"pid");if(!pid)return;(RV[pid]=RV[pid]||[]).push({n:sv(f,"n")||"زائر",s:nv(f,"s")||0,x:sv(f,"x"),t:sv(f,"t")})})}).catch(function(){}).then(renderAll);
   runQ("",onlyOn("announcements",40)).then(function(ds){
-    ANN=ds.map(function(d){var f=d.fields||{};return {ty:sv(f,"ty"),ti:sv(f,"ti"),x:sv(f,"x"),dt:sv(f,"dt"),pl:sv(f,"pl"),u:sv(f,"u"),t:sv(f,"t")}});
+    ANN=ds.map(function(d){var f=d.fields||{};return {ty:sv(f,"ty"),ti:sv(f,"ti"),x:sv(f,"x"),dt:sv(f,"dt"),pl:sv(f,"pl"),u:sv(f,"u"),img:sv(f,"img"),t:sv(f,"t")}});
     ls("c_a",JSON.stringify(ANN));
   }).catch(function(){}).then(renderAnn);
   runQ("",onlyOn("offers",100)).then(function(ds){
@@ -341,6 +345,7 @@ function renderAnn(){
   var a=ANN.filter(function(x){return !x.u||x.u>=today}).sort(function(m,n){return m.t<n.t?1:-1}).slice(0,6);
   $("ann").innerHTML=a.map(function(x){var y=TY[x.ty]||TY["مناسبة"];
     return '<div class="ann '+y.c+'"><div class="ty">'+y.i+' '+esc(x.ty||"مناسبة")+'</div><div class="ti">'+esc(x.ti)+'</div>'+
+    (x.img?'<img src="'+esc(x.img)+'" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:12px;margin:6px 0">':'')+
     (x.ty==="وفاة"?'<div class="sub">إنا لله وإنا إليه راجعون</div>':'')+(x.x?'<div>'+esc(x.x)+'</div>':'')+
     (x.dt?'<div class="sub">🗓 '+esc(x.dt)+'</div>':'')+(x.pl?'<div class="sub">📍 '+esc(x.pl)+'</div>':'')+'</div>'}).join("");
 }
@@ -563,23 +568,29 @@ $("dhikrs").addEventListener("click",function(e){var b=e.target.closest("[data-d
 tbChips();tbRender();
 
 /* الإعلانات والمناسبات */
+function shrink(f,max,cb){var r=new FileReader();r.onload=function(){var i=new Image();i.onload=function(){var k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.7))};i.onerror=function(){cb("")};i.src=r.result};r.readAsDataURL(f)}
+var aimg="",pimg="";
+$("aimgf").addEventListener("change",function(){var f=this.files[0];aimg="";$("aimgp").style.display="none";if(f)shrink(f,800,function(d){aimg=d;if(d){$("aimgp").src=d;$("aimgp").style.display="block"}})});
+$("pimgf").addEventListener("change",function(){var f=this.files[0];pimg="";$("pimgp").style.display="none";if(f)shrink(f,800,function(d){pimg=d;if(d){$("pimgp").src=d;$("pimgp").style.display="block"}})});
 $("afb").addEventListener("click",function(){$("af").classList.toggle("hide");$("pf").classList.add("hide")});
 $("pfb").addEventListener("click",function(){$("pf").classList.toggle("hide");$("af").classList.add("hide")});
 $("af").addEventListener("submit",function(e){
   e.preventDefault();var b=$("asb");
   if(Date.now()-(+ls("lastAnn")||0)<60000){toast("انتظر دقيقة قبل إرسال إعلان آخر.");return}
+  if(aimg.length>200000){toast("الصورة كبيرة جدًا، جرّب صورة أصغر.");return}
   b.disabled=true;
-  post("/announcements",{ty:S($("aty").value,10),ti:S($("ati").value.trim(),100),x:S($("ax").value.trim(),400),dt:S($("adt").value.trim(),100),pl:S($("apl").value.trim(),100),u:S($("au").value,10),cn:S("",60),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
-    if(r.ok){ls("lastAnn",String(Date.now()));toast("تم استلام إعلانك ✅ هيظهر بعد مراجعة الإدارة");$("af").reset();$("af").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+  post("/announcements",{ty:S($("aty").value,10),ti:S($("ati").value.trim(),100),x:S($("ax").value.trim(),400),dt:S($("adt").value.trim(),100),pl:S($("apl").value.trim(),100),u:S($("au").value,10),cn:S("",60),img:S(aimg,200000),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastAnn",String(Date.now()));toast("تم استلام إعلانك ✅ هيظهر بعد مراجعة الإدارة");$("af").reset();aimg="";$("aimgp").style.display="none";$("af").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
     b.disabled=false;
   }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
 });
 $("pf").addEventListener("submit",function(e){
   e.preventDefault();var b=$("psb");
   if(Date.now()-(+ls("lastAd")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");return}
+  if(pimg.length>200000){toast("الصورة كبيرة جدًا، جرّب صورة أصغر.");return}
   b.disabled=true;
   var ti=$("pti").value.trim();
-  post("/announcements",{ty:S("عرض",10),ti:S(ti,100),x:S($("px").value.trim(),400),dt:S("",100),pl:S($("ppl").value.trim(),100),u:S($("pu").value,10),cn:S($("pcn").value.trim(),60),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+  post("/announcements",{ty:S("عرض",10),ti:S(ti,100),x:S($("px").value.trim(),400),dt:S("",100),pl:S($("ppl").value.trim(),100),u:S($("pu").value,10),cn:S($("pcn").value.trim(),60),img:S(pimg,200000),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
     if(r.ok){ls("lastAd",String(Date.now()));toast("تم استلام طلب الإعلان ✅ كمّل الدفع تحت");$("paybox").classList.remove("hide");$("paywa").href="https://wa.me/201050766025?text="+encodeURIComponent("أنا دفعت 100 جنيه إنستاباي لإعلان: "+ti)}else toast("تعذّر الإرسال، حاول لاحقًا.");
     b.disabled=false;
   }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});

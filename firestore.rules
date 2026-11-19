@@ -70,11 +70,11 @@ service cloud.firestore {
       allow read: if isAdmin() || resource.data.approved == true;
       allow create: if isAdmin() || (
         d().approved == false &&
-        d().keys().hasOnly(['ty','ti','x','dt','pl','u','cn','t','approved']) &&
+        d().keys().hasOnly(['ty','ti','x','dt','pl','u','cn','img','t','approved']) &&
         d().ty in ['فرح','وفاة','مناسبة','تنبيه','عرض'] &&
         d().ti is string && d().ti.size() > 0 && d().ti.size() <= 100 &&
         d().x.size() <= 400 && d().dt.size() <= 100 && d().pl.size() <= 100 &&
-        d().u.size() <= 10 && d().cn.size() <= 60);
+        d().u.size() <= 10 && d().cn.size() <= 60 && d().img.size() <= 200000);
       allow update, delete: if isAdmin();
     }
 

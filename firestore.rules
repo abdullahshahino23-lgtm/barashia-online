@@ -65,6 +65,12 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // الأرقام المهمة
+    match /numbers/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // المحادثات
     match /chats/{cid} {
       allow get: if true;

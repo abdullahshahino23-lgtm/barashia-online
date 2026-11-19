@@ -102,6 +102,18 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
 <button class="btn o" id="addhome" type="button" style="width:100%;margin-top:10px">＋ أضف خدمتك مجانًا</button>
   <div class="emg"><span class="sub" style="align-self:center;flex:none">🚨 طوارئ:</span><a href="tel:122">الشرطة 122</a><a href="tel:123">الإسعاف 123</a><a href="tel:180">المطافئ 180</a></div>
   <div id="ann"></div>
+  <h2>🤲 الاستغفار والمسبحة</h2>
+  <div class="box" style="text-align:center">
+    <div id="dhikr" style="font-size:26px;font-weight:800">أستغفر الله</div>
+    <button id="tbtn" type="button" aria-label="عدّاد التسبيح" style="display:block;margin:14px auto;width:150px;height:150px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;font:inherit;font-size:36px;font-weight:800;cursor:pointer;box-shadow:var(--sh)">0</button>
+    <div class="sub" id="tinfo">اضغط على الزر للتسبيح</div>
+    <div class="row" id="dhikrs" style="justify-content:center;margin-top:10px"></div>
+    <div class="row" style="justify-content:center;margin-top:8px">
+      <button class="btn s" id="tgoal" type="button">الهدف: 100</button>
+      <button class="btn s" id="treset" type="button">تصفير</button>
+    </div>
+    <div class="sub" id="ttotal" style="margin-top:8px"></div>
+  </div>
   <h2>الأقسام</h2>
   <div class="grid" id="grid"></div>
   <div class="row" style="margin-top:8px"><button class="btn s" id="gmore" type="button" style="width:100%">كل الأقسام ▾</button></div>
@@ -475,6 +487,28 @@ $("cs").addEventListener("click",function(){
   }).then(function(r){if(r&&r.ok&&!inited){inited=true;ls("cinit","1");$("chatname").classList.add("hide")}pollChat()}).catch(function(){$("ct").value=tx;toast("تعذّر إرسال الرسالة.")});
 });
 $("ct").addEventListener("keydown",function(e){if(e.key==="Enter")$("cs").click()});
+
+/* المسبحة */
+var DHIKRS=["أستغفر الله","سبحان الله","الحمد لله","الله أكبر","لا إله إلا الله"];
+var GOALS=[33,99,100,500,1000];
+var tb={d:0,c:0,g:2,total:0};
+try{var _tb=JSON.parse(ls("tasbih")||"null");if(_tb&&typeof _tb==="object")tb=_tb}catch(e){}
+function tbSave(){ls("tasbih",JSON.stringify(tb))}
+function tbChips(){
+  $("dhikrs").innerHTML=DHIKRS.map(function(x,i){return '<button class="btn s" type="button" data-d="'+i+'" style="'+(i===tb.d?"outline:2px solid var(--g);font-weight:800":"")+'">'+x+'</button>'}).join("");
+}
+function tbRender(){
+  $("dhikr").textContent=DHIKRS[tb.d];
+  $("tbtn").textContent=tb.c;
+  $("tgoal").textContent="الهدف: "+GOALS[tb.g];
+  $("tinfo").textContent=tb.c>=GOALS[tb.g]?"🎉 أتممت "+GOALS[tb.g]+" — تقبل الله":"اضغط على الزر للتسبيح";
+  $("ttotal").textContent="المجموع الكلي: "+tb.total;
+}
+$("tbtn").addEventListener("click",function(){tb.c++;tb.total++;if(navigator.vibrate)navigator.vibrate(10);tbSave();tbRender()});
+$("treset").addEventListener("click",function(){tb.c=0;tbSave();tbRender()});
+$("tgoal").addEventListener("click",function(){tb.g=(tb.g+1)%GOALS.length;tbSave();tbRender()});
+$("dhikrs").addEventListener("click",function(e){var b=e.target.closest("[data-d]");if(!b)return;tb.d=+b.getAttribute("data-d");tb.c=0;tbSave();tbChips();tbRender()});
+tbChips();tbRender();
 
 renderAll();renderChips();loadAll();
 </script>

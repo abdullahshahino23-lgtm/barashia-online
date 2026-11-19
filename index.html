@@ -102,18 +102,6 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
 <button class="btn o" id="addhome" type="button" style="width:100%;margin-top:10px">＋ أضف خدمتك مجانًا</button>
   <div class="emg"><span class="sub" style="align-self:center;flex:none">🚨 طوارئ:</span><a href="tel:122">الشرطة 122</a><a href="tel:123">الإسعاف 123</a><a href="tel:180">المطافئ 180</a></div>
   <div id="ann"></div>
-  <h2>🤲 الاستغفار والمسبحة</h2>
-  <div class="box" style="text-align:center">
-    <div id="dhikr" style="font-size:26px;font-weight:800">أستغفر الله</div>
-    <button id="tbtn" type="button" aria-label="عدّاد التسبيح" style="display:block;margin:14px auto;width:150px;height:150px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;font:inherit;font-size:36px;font-weight:800;cursor:pointer;box-shadow:var(--sh)">0</button>
-    <div class="sub" id="tinfo">اضغط على الزر للتسبيح</div>
-    <div class="row" id="dhikrs" style="justify-content:center;margin-top:10px"></div>
-    <div class="row" style="justify-content:center;margin-top:8px">
-      <button class="btn s" id="tgoal" type="button">الهدف: 100</button>
-      <button class="btn s" id="treset" type="button">تصفير</button>
-    </div>
-    <div class="sub" id="ttotal" style="margin-top:8px"></div>
-  </div>
   <div class="row" style="margin-top:14px">
     <button class="btn" id="afb" type="button" style="flex:1">📣 أعلن عن مناسبة</button>
     <button class="btn o" id="pfb" type="button" style="flex:1">🏷️ إعلان مدفوع — 100 جنيه</button>
@@ -173,6 +161,21 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
   </footer>
 </main>
 
+<main id="v_tas" class="hide">
+  <h2>📿 الاستغفار والمسبحة</h2>
+  <div class="box" style="text-align:center">
+    <div id="dhikr" style="font-size:22px;font-weight:800">أستغفر الله</div>
+    <button id="tbtn" type="button" aria-label="عدّاد التسبيح" style="display:block;margin:12px auto;width:110px;height:110px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;font:inherit;font-size:28px;font-weight:800;cursor:pointer;box-shadow:var(--sh)">0</button>
+    <div class="sub" id="tinfo">اضغط على الزر للتسبيح</div>
+    <div class="row" id="dhikrs" style="justify-content:center;margin-top:10px"></div>
+    <div class="row" style="justify-content:center;margin-top:8px">
+      <button class="btn s" id="tgoal" type="button">الهدف: 100</button>
+      <button class="btn s" id="treset" type="button">تصفير</button>
+    </div>
+    <div class="sub" id="ttotal" style="margin-top:8px"></div>
+  </div>
+</main>
+
 <main id="v_dir" class="hide">
   <div class="row" style="margin-top:14px;flex-wrap:nowrap"><input id="dq" type="search" placeholder="ابحث..." aria-label="بحث" style="flex:1"><button class="btn o" id="addb" type="button">＋ أضف خدمتك</button></div>
   <div class="chips" id="chips"></div>
@@ -225,6 +228,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
   <button type="button" data-v="num" aria-pressed="false"><span class="i">☎️</span>أرقام</button>
   <button type="button" data-v="sug" aria-pressed="false"><span class="i">💡</span>مقترحات</button>
   <button type="button" data-v="chat" aria-pressed="false"><span class="i">💬</span>استفسارات</button>
+  <button type="button" data-v="tas" aria-pressed="false"><span class="i">📿</span>المسبحة</button>
 </nav>
 
 <div class="ov hide" id="sheet"><div class="in" id="sheetin"></div></div>
@@ -304,7 +308,7 @@ function allCats(){var l=CATG.map(function(x){return x[0]}),seen={};l.forEach(fu
 
 /* التنقل */
 function view(v){
-  ["home","dir","num","sug","chat"].forEach(function(k){$("v_"+k).classList.toggle("hide",k!==v)});
+  ["home","dir","num","sug","chat","tas"].forEach(function(k){$("v_"+k).classList.toggle("hide",k!==v)});
   Array.prototype.forEach.call($("nav").children,function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-v")===v))});
   clearInterval(timer);
   if(v==="sug")loadSug();

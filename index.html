@@ -103,21 +103,8 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
   <div class="emg"><span class="sub" style="align-self:center;flex:none">🚨 طوارئ:</span><a href="tel:122">الشرطة 122</a><a href="tel:123">الإسعاف 123</a><a href="tel:180">المطافئ 180</a></div>
   <div id="ann"></div>
   <div class="row" style="margin-top:14px">
-    <button class="btn" id="afb" type="button" style="flex:1">📣 أعلن عن مناسبة</button>
     <button class="btn o" id="pfb" type="button" style="flex:1">🏷️ إعلان مدفوع — 100 جنيه</button>
   </div>
-  <form id="af" class="box hide" style="margin-top:10px">
-    <label>نوع المناسبة<select id="aty"><option>فرح</option><option>وفاة</option><option>مناسبة</option><option>تنبيه</option></select></label>
-    <label>العنوان *<input id="ati" required maxlength="100" placeholder="مثال: فرح ابن الحاج محمد"></label>
-    <label>التفاصيل<textarea id="ax" maxlength="400" placeholder="أي تفاصيل تانية"></textarea></label>
-    <label>التاريخ والموعد<input id="adt" maxlength="100" placeholder="مثال: الجمعة القادمة بعد العصر"></label>
-    <label>المكان<input id="apl" maxlength="100" placeholder="مثال: قاعة النور"></label>
-    <label>يظهر حتى تاريخ (اختياري)<input id="au" type="date"></label>
-    <label>صورة البوستر (اختياري)<input id="aimgf" type="file" accept="image/*"></label>
-    <img id="aimgp" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin:6px 0">
-    <button class="btn" type="submit" id="asb">إرسال الإعلان</button>
-    <div class="sub" style="margin-top:6px">الإعلان مجاني، وبيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
-  </form>
   <form id="pf" class="box hide" style="margin-top:10px">
     <label>عنوان الإعلان *<input id="pti" required maxlength="100" placeholder="مثال: افتتاح محل النور للملابس"></label>
     <label>تفاصيل الإعلان<textarea id="px" maxlength="400" placeholder="العروض والأسعار وأي تفاصيل"></textarea></label>
@@ -569,21 +556,9 @@ tbChips();tbRender();
 
 /* الإعلانات والمناسبات */
 function shrink(f,max,cb){var r=new FileReader();r.onload=function(){var i=new Image();i.onload=function(){var k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.7))};i.onerror=function(){cb("")};i.src=r.result};r.readAsDataURL(f)}
-var aimg="",pimg="";
-$("aimgf").addEventListener("change",function(){var f=this.files[0];aimg="";$("aimgp").style.display="none";if(f)shrink(f,800,function(d){aimg=d;if(d){$("aimgp").src=d;$("aimgp").style.display="block"}})});
+var pimg="";
 $("pimgf").addEventListener("change",function(){var f=this.files[0];pimg="";$("pimgp").style.display="none";if(f)shrink(f,800,function(d){pimg=d;if(d){$("pimgp").src=d;$("pimgp").style.display="block"}})});
-$("afb").addEventListener("click",function(){$("af").classList.toggle("hide");$("pf").classList.add("hide")});
-$("pfb").addEventListener("click",function(){$("pf").classList.toggle("hide");$("af").classList.add("hide")});
-$("af").addEventListener("submit",function(e){
-  e.preventDefault();var b=$("asb");
-  if(Date.now()-(+ls("lastAnn")||0)<60000){toast("انتظر دقيقة قبل إرسال إعلان آخر.");return}
-  if(aimg.length>200000){toast("الصورة كبيرة جدًا، جرّب صورة أصغر.");return}
-  b.disabled=true;
-  post("/announcements",{ty:S($("aty").value,10),ti:S($("ati").value.trim(),100),x:S($("ax").value.trim(),400),dt:S($("adt").value.trim(),100),pl:S($("apl").value.trim(),100),u:S($("au").value,10),cn:S("",60),img:S(aimg,200000),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
-    if(r.ok){ls("lastAnn",String(Date.now()));toast("تم استلام إعلانك ✅ هيظهر بعد مراجعة الإدارة");$("af").reset();aimg="";$("aimgp").style.display="none";$("af").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
-    b.disabled=false;
-  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
-});
+$("pfb").addEventListener("click",function(){$("pf").classList.toggle("hide")});
 $("pf").addEventListener("submit",function(e){
   e.preventDefault();var b=$("psb");
   if(Date.now()-(+ls("lastAd")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");return}

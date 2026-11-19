@@ -146,6 +146,19 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
       <div class="sub" style="margin-top:6px">بعد الدفع ابعت صورة التحويل على واتساب، والإعلان هيظهر في الصفحة الرئيسية بعد المراجعة.</div>
     </div>
   </form>
+  <h2>🏷️ عروض أصحاب الخدمات</h2>
+  <div id="offers"></div>
+  <button class="btn" id="ofb" type="button" style="width:100%;margin-top:8px">＋ أضف عرضك</button>
+  <form id="of" class="box hide" style="margin-top:10px">
+    <label>عنوان العرض *<input id="on" required maxlength="80" placeholder="مثال: خصم 20% على كل الملابس"></label>
+    <label>السعر (اختياري)<input id="opr" type="number" min="0" inputmode="numeric" placeholder="بالجنيه"></label>
+    <label>تفاصيل العرض<textarea id="od" maxlength="300" placeholder="تفاصيل العرض ومدته"></textarea></label>
+    <label>اسمك أو اسم المحل *<input id="ocn" required maxlength="60"></label>
+    <label>رقم التليفون *<input id="op" required inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx"></label>
+    <label>رابط صورة (اختياري)<input id="oimg" maxlength="500" inputmode="url" placeholder="https://..."></label>
+    <button class="btn" type="submit" id="osb">إرسال العرض</button>
+    <div class="sub" style="margin-top:6px">العرض بيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
+  </form>
   <h2>الأقسام</h2>
   <div class="grid" id="grid"></div>
   <div class="row" style="margin-top:8px"><button class="btn s" id="gmore" type="button" style="width:100%">كل الأقسام ▾</button></div>
@@ -277,7 +290,7 @@ function withLegacy(list){
   return list.concat(LEGACY.filter(function(x){return !have[x.p.replace(/\D/g,"")]}));
 }
 
-var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],loaded=PDB.length>0;
+var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],OFF=[],loaded=PDB.length>0;
 var st={cat:"",sort:"new",fav:false,q:"",page:1,all:false,me:null};
 var FAV=jget("fav",[]),timer=null,pend={lat:null,lng:null};
 var PAGE=15;
@@ -311,6 +324,9 @@ function loadAll(){
     ANN=ds.map(function(d){var f=d.fields||{};return {ty:sv(f,"ty"),ti:sv(f,"ti"),x:sv(f,"x"),dt:sv(f,"dt"),pl:sv(f,"pl"),u:sv(f,"u"),t:sv(f,"t")}});
     ls("c_a",JSON.stringify(ANN));
   }).catch(function(){}).then(renderAnn);
+  runQ("",onlyOn("offers",100)).then(function(ds){
+    OFF=ds.map(function(d){var f=d.fields||{};return {n:sv(f,"n"),pr:nv(f,"pr")||0,d:sv(f,"d"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t")}});
+  }).catch(function(){}).then(renderOffers);
 }
 function skel(n){var h="";for(var i=0;i<n;i++)h+='<div class="skel"></div>';return h}
 
@@ -568,6 +584,31 @@ $("copyipa").addEventListener("click",function(){
   var ipa="abdullah.shahino23@instapay";
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ipa).then(function(){toast("اتنسخ عنوان إنستاباي ✅")}).catch(function(){toast(ipa)})}
   else toast(ipa);
+});
+
+/* عروض أصحاب الخدمات */
+function renderOffers(){
+  var a=OFF.slice().sort(function(m,n){return m.t<n.t?1:-1}).slice(0,10);
+  $("offers").innerHTML=a.length?a.map(function(x){
+    return '<div class="ann e"><div class="ti">🏷️ '+esc(x.n)+(x.pr?' — '+esc(x.pr)+' جنيه':'')+'</div>'+
+    (x.img?'<img src="'+esc(x.img)+'" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;margin:6px 0">':'')+
+    (x.d?'<div>'+esc(x.d)+'</div>':'')+
+    '<div class="sub">'+esc(x.cn)+(x.p?' • <a href="tel:'+esc(x.p)+'">'+esc(x.p)+'</a>':'')+'</div></div>';
+  }).join(""):'<div class="sub">لا توجد عروض حاليًا — كن أول من يضيف عرضًا.</div>';
+}
+$("ofb").addEventListener("click",function(){$("of").classList.toggle("hide")});
+$("of").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("osb");
+  var ph=$("op").value.trim();
+  if(ph.replace(/\D/g,"").length<8){toast("اكتب رقم تليفون صحيح.");return}
+  var img=$("oimg").value.trim();
+  if(img&&!safeUrl(img)){toast("رابط الصورة لازم يبدأ بـ https://");return}
+  if(Date.now()-(+ls("lastOffer")||0)<60000){toast("انتظر دقيقة قبل إرسال عرض آخر.");return}
+  b.disabled=true;
+  post("/offers",{k:S("sell",10),n:S($("on").value.trim(),80),pr:{doubleValue:parseFloat($("opr").value)||0},d:S($("od").value.trim(),300),cn:S($("ocn").value.trim(),60),p:S(ph,20),img:S(img,500),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastOffer",String(Date.now()));toast("تم استلام عرضك ✅ هيظهر بعد مراجعة الإدارة");$("of").reset();$("of").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
 });
 
 renderAll();renderChips();loadAll();

@@ -61,7 +61,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <button class="tab" data-t="o" aria-pressed="false" type="button">الطلبات</button>
     <button class="tab" data-t="m" aria-pressed="false" type="button">العروض</button>
     <button class="tab" data-t="u" aria-pressed="false" type="button">مقترحات</button>
-    <button class="tab" data-t="e" aria-pressed="false" type="button">الأخبار</button>
+    <button class="tab" data-t="e" aria-pressed="false" type="button">الإعلانات</button>
     <button class="tab" data-t="s" aria-pressed="false" type="button">إحصائيات</button>
   </div>
 
@@ -92,10 +92,12 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
   <section id="tu" class="hide"><div id="ulist"></div></section>
   <section id="te" class="hide">
     <form id="nf" class="box">
-      <label>نوع الإعلان<select id="nk"><option value="wedding">أفراح</option><option value="death">وفاة</option><option value="event">مناسبة</option></select></label>
+      <label>نوع الإعلان<select id="nk"><option>فرح</option><option>وفاة</option><option>مناسبة</option><option>تنبيه</option><option>عرض</option></select></label>
       <label>العنوان<input id="nn" required maxlength="100"></label>
       <label>التفاصيل<textarea id="nd" maxlength="400"></textarea></label>
-      <label>التاريخ والمكان<input id="ndt" maxlength="100"></label>
+      <label>التاريخ والموعد<input id="ndt" maxlength="100"></label>
+      <label>المكان<input id="npl" maxlength="100"></label>
+      <label>يظهر حتى تاريخ<input id="nu" type="date"></label>
       <button class="btn" type="submit">نشر الإعلان</button>
     </form>
     <div id="elist"></div>
@@ -374,21 +376,20 @@ var suggestions=[],news=[];
 function delDoc(path,msg,cb){if(!confirm(msg))return;say("جاري الحذف...");rm(FB+path).then(function(r){if(r.ok){say("تم الحذف.");cb()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})}
 function loadY(){
   runQ("",{from:[{collectionId:"suggestions"}],limit:500}).then(function(ds){suggestions=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),c:sv(f,"c"),ti:sv(f,"ti"),x:sv(f,"x"),t:sv(f,"t")}}).sort(byT);renderU();badges()}).catch(function(){});
-  runQ("",{from:[{collectionId:"news"}],limit:200}).then(function(ds){news=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),n:sv(f,"n"),d:sv(f,"d"),dt:sv(f,"dt"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderE()}).catch(function(){});
+  runQ("",{from:[{collectionId:"announcements"}],limit:200}).then(function(ds){news=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),ty:sv(f,"ty"),ti:sv(f,"ti"),x:sv(f,"x"),dt:sv(f,"dt"),pl:sv(f,"pl"),u:sv(f,"u"),cn:sv(f,"cn"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderE()}).catch(function(){});
 }
 function renderU(){
   $("ulist").innerHTML=suggestions.length?suggestions.map(function(x){return '<div class="box"><div><b>'+esc(x.ti||"مقترح")+'</b></div><div class="sub">'+esc(x.c)+' • '+esc(x.n||"بدون اسم")+'</div><div>'+esc(x.x)+'</div><div class="sub">'+esc(x.t.slice(0,16).replace("T"," "))+'</div><div class="row" style="margin-top:8px"><button class="btn d" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>'}).join(""):'<div class="box sub">لا توجد مقترحات.</div>';
 }
 $("ulist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(b)delDoc("/suggestions/"+b.getAttribute("data-id"),"حذف المقترح؟",loadY)});
-var KN={wedding:"أفراح",death:"وفاة",event:"مناسبة"};
 function renderE(){
-  $("elist").innerHTML=news.length?news.map(function(x){return '<div class="box"><div class="row" style="justify-content:space-between"><span class="nm">'+esc(x.n)+'</span><span class="tag'+(x.on?"":" off")+'">'+esc(KN[x.k]||x.k)+' • '+(x.on?"ظاهر":"مخفي")+'</span></div>'+(x.d?'<div>'+esc(x.d)+'</div>':'')+(x.dt?'<div class="sub">'+esc(x.dt)+'</div>':'')+'<div class="row" style="margin-top:8px"><button class="btn s" data-id="'+att(x.id)+'" data-a="tg" type="button">'+(x.on?"إخفاء":"إظهار")+'</button><button class="btn d" data-id="'+att(x.id)+'" data-a="del" type="button">حذف</button></div></div>'}).join(""):'<div class="box sub">لا توجد إعلانات.</div>';
+  $("elist").innerHTML=news.length?news.map(function(x){return '<div class="box"><div class="row" style="justify-content:space-between"><span class="nm">'+esc(x.ti)+'</span><span class="tag'+(x.on?"":" off")+'">'+esc(x.ty||"مناسبة")+' • '+(x.on?"ظاهر":"مخفي")+'</span></div>'+(x.x?'<div>'+esc(x.x)+'</div>':'')+(x.dt?'<div class="sub">🗓 '+esc(x.dt)+'</div>':'')+(x.pl?'<div class="sub">📍 '+esc(x.pl)+'</div>':'')+(x.cn?'<div class="sub">👤 '+esc(x.cn)+'</div>':'')+(x.u?'<div class="sub">حتى: '+esc(x.u)+'</div>':'')+'<div class="row" style="margin-top:8px"><button class="btn s" data-id="'+att(x.id)+'" data-a="tg" type="button">'+(x.on?"إخفاء":"إظهار")+'</button><button class="btn d" data-id="'+att(x.id)+'" data-a="del" type="button">حذف</button></div></div>'}).join(""):'<div class="box sub">لا توجد إعلانات.</div>';
 }
 $("elist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=news.filter(function(i){return i.id===id})[0];
-  if(b.getAttribute("data-a")==="del"){delDoc("/news/"+id,"حذف الإعلان؟",loadY);return}
-  say("جاري التنفيذ...");patch("/news/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderE()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
+  if(b.getAttribute("data-a")==="del"){delDoc("/announcements/"+id,"حذف الإعلان؟",loadY);return}
+  say("جاري التنفيذ...");patch("/announcements/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderE()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
 $("nf").addEventListener("submit",function(e){e.preventDefault();say("جاري النشر...");
-  api(FB+"/news?key="+KEY,{method:"POST",body:JSON.stringify({fields:{k:S($("nk").value,10),n:S($("nn").value.trim(),100),d:S($("nd").value.trim(),400),dt:S($("ndt").value.trim(),100),t:S(new Date().toISOString(),40),approved:{booleanValue:true}}})}).then(function(r){if(r.ok){$("nf").reset();say("تم نشر الإعلان.");loadY()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
+  api(FB+"/announcements?key="+KEY,{method:"POST",body:JSON.stringify({fields:{ty:S($("nk").value,10),ti:S($("nn").value.trim(),100),x:S($("nd").value.trim(),400),dt:S($("ndt").value.trim(),100),pl:S($("npl").value.trim(),100),u:S($("nu").value,10),cn:S("",60),t:S(new Date().toISOString(),40),approved:{booleanValue:true}}})}).then(function(r){if(r.ok){$("nf").reset();say("تم نشر الإعلان.");loadY()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
 $("olist").addEventListener("click",function(e){var b=e.target.closest("button[data-del]");if(b)delDoc("/orders/"+b.getAttribute("data-del"),"حذف الطلب؟",loadX)});
 $("cdel").addEventListener("click",function(){if(!curChat)return;var id=curChat;if(!confirm("حذف المحادثة كلها؟"))return;say("جاري الحذف...");
   runQ("/chats/"+id,{from:[{collectionId:"messages"}],limit:500}).then(function(ds){return Promise.all(ds.map(function(d){return rm("https://firestore.googleapis.com/v1/"+d.name)}))}).then(function(){return rm(FB+"/chats/"+id)}).then(function(r){if(r.ok){say("تم الحذف.");$("cback").click()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});

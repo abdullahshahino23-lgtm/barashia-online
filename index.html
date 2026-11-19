@@ -114,6 +114,38 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     </div>
     <div class="sub" id="ttotal" style="margin-top:8px"></div>
   </div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn" id="afb" type="button" style="flex:1">📣 أعلن عن مناسبة</button>
+    <button class="btn o" id="pfb" type="button" style="flex:1">🏷️ إعلان مدفوع — 100 جنيه</button>
+  </div>
+  <form id="af" class="box hide" style="margin-top:10px">
+    <label>نوع المناسبة<select id="aty"><option>فرح</option><option>وفاة</option><option>مناسبة</option><option>تنبيه</option></select></label>
+    <label>العنوان *<input id="ati" required maxlength="100" placeholder="مثال: فرح ابن الحاج محمد"></label>
+    <label>التفاصيل<textarea id="ax" maxlength="400" placeholder="أي تفاصيل تانية"></textarea></label>
+    <label>التاريخ والموعد<input id="adt" maxlength="100" placeholder="مثال: الجمعة القادمة بعد العصر"></label>
+    <label>المكان<input id="apl" maxlength="100" placeholder="مثال: قاعة النور"></label>
+    <label>يظهر حتى تاريخ (اختياري)<input id="au" type="date"></label>
+    <button class="btn" type="submit" id="asb">إرسال الإعلان</button>
+    <div class="sub" style="margin-top:6px">الإعلان مجاني، وبيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
+  </form>
+  <form id="pf" class="box hide" style="margin-top:10px">
+    <label>عنوان الإعلان *<input id="pti" required maxlength="100" placeholder="مثال: افتتاح محل النور للملابس"></label>
+    <label>تفاصيل الإعلان<textarea id="px" maxlength="400" placeholder="العروض والأسعار وأي تفاصيل"></textarea></label>
+    <label>العنوان / المكان<input id="ppl" maxlength="100"></label>
+    <label>يظهر حتى تاريخ (اختياري)<input id="pu" type="date"></label>
+    <label>اسمك ورقم تليفونك للتواصل *<input id="pcn" required maxlength="60" placeholder="الاسم — رقم التليفون"></label>
+    <button class="btn o" type="submit" id="psb">إرسال طلب الإعلان</button>
+    <div class="sub" style="margin-top:6px">سعر الإعلان 100 جنيه. بعد الإرسال هتظهر لك طريقة الدفع، والإعلان بيظهر بعد تأكيد الدفع ومراجعة الإدارة.</div>
+    <div id="paybox" class="hide" style="margin-top:10px;border:1px dashed var(--line);border-radius:14px;padding:12px">
+      <div style="font-weight:800">💳 ادفع 100 جنيه عبر إنستاباي</div>
+      <div dir="ltr" style="font-weight:800;font-size:17px;margin:6px 0">abdullah.shahino23@instapay</div>
+      <div class="row">
+        <button class="btn s" id="copyipa" type="button">نسخ عنوان إنستاباي</button>
+        <a class="btn w" id="paywa" href="https://wa.me/201050766025" target="_blank" rel="noopener">تأكيد الدفع واتساب</a>
+      </div>
+      <div class="sub" style="margin-top:6px">بعد الدفع ابعت صورة التحويل على واتساب، والإعلان هيظهر في الصفحة الرئيسية بعد المراجعة.</div>
+    </div>
+  </form>
   <h2>الأقسام</h2>
   <div class="grid" id="grid"></div>
   <div class="row" style="margin-top:8px"><button class="btn s" id="gmore" type="button" style="width:100%">كل الأقسام ▾</button></div>
@@ -509,6 +541,34 @@ $("treset").addEventListener("click",function(){tb.c=0;tbSave();tbRender()});
 $("tgoal").addEventListener("click",function(){tb.g=(tb.g+1)%GOALS.length;tbSave();tbRender()});
 $("dhikrs").addEventListener("click",function(e){var b=e.target.closest("[data-d]");if(!b)return;tb.d=+b.getAttribute("data-d");tb.c=0;tbSave();tbChips();tbRender()});
 tbChips();tbRender();
+
+/* الإعلانات والمناسبات */
+$("afb").addEventListener("click",function(){$("af").classList.toggle("hide");$("pf").classList.add("hide")});
+$("pfb").addEventListener("click",function(){$("pf").classList.toggle("hide");$("af").classList.add("hide")});
+$("af").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("asb");
+  if(Date.now()-(+ls("lastAnn")||0)<60000){toast("انتظر دقيقة قبل إرسال إعلان آخر.");return}
+  b.disabled=true;
+  post("/announcements",{ty:S($("aty").value,10),ti:S($("ati").value.trim(),100),x:S($("ax").value.trim(),400),dt:S($("adt").value.trim(),100),pl:S($("apl").value.trim(),100),u:S($("au").value,10),cn:S("",60),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastAnn",String(Date.now()));toast("تم استلام إعلانك ✅ هيظهر بعد مراجعة الإدارة");$("af").reset();$("af").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
+});
+$("pf").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("psb");
+  if(Date.now()-(+ls("lastAd")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");return}
+  b.disabled=true;
+  var ti=$("pti").value.trim();
+  post("/announcements",{ty:S("عرض",10),ti:S(ti,100),x:S($("px").value.trim(),400),dt:S("",100),pl:S($("ppl").value.trim(),100),u:S($("pu").value,10),cn:S($("pcn").value.trim(),60),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastAd",String(Date.now()));toast("تم استلام طلب الإعلان ✅ كمّل الدفع تحت");$("paybox").classList.remove("hide");$("paywa").href="https://wa.me/201050766025?text="+encodeURIComponent("أنا دفعت 100 جنيه إنستاباي لإعلان: "+ti)}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
+});
+$("copyipa").addEventListener("click",function(){
+  var ipa="abdullah.shahino23@instapay";
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ipa).then(function(){toast("اتنسخ عنوان إنستاباي ✅")}).catch(function(){toast(ipa)})}
+  else toast(ipa);
+});
 
 renderAll();renderChips();loadAll();
 </script>

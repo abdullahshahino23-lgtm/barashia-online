@@ -607,8 +607,8 @@ function prayFetch(lat,lng,label){
   }).catch(function(){});
 }
 function prayInit(){
-  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){prayFetch(p.coords.latitude,p.coords.longitude,"حسب موقعك الحالي")},function(){prayFetch(30.0444,31.2357,"القاهرة — فعّل الموقع لمواقيت أدق")},{timeout:4000})}
-  else prayFetch(30.0444,31.2357,"القاهرة");
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){prayFetch(p.coords.latitude,p.coords.longitude,"حسب موقعك الحالي")},function(){prayFetch(31.4165,31.8133,"دمياط — فعّل الموقع لمواقيت أدق")},{timeout:4000})}
+  else prayFetch(31.4165,31.8133,"دمياط");
 }
 prayInit();setInterval(prayRender,60000);
 

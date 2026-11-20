@@ -63,6 +63,8 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <button class="tab" data-t="u" aria-pressed="false" type="button">مقترحات</button>
     <button class="tab" data-t="e" aria-pressed="false" type="button">الإعلانات</button>
     <button class="tab" data-t="l" aria-pressed="false" type="button">مفقودات</button>
+    <button class="tab" data-t="j" aria-pressed="false" type="button">الوظائف</button>
+    <button class="tab" data-t="g" aria-pressed="false" type="button">استشارات تقنية</button>
     <button class="tab" data-t="s" aria-pressed="false" type="button">إحصائيات</button>
   </div>
 
@@ -104,6 +106,18 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
     <div id="elist"></div>
   </section>
   <section id="tl" class="hide"><div id="llist"></div></section>
+  <section id="tj" class="hide">
+    <form id="jf" class="box">
+      <label>المسمى الوظيفي<input id="jti" required maxlength="80"></label>
+      <label>اسم الشركة / صاحب العمل<input id="jco" required maxlength="60"></label>
+      <label>التفاصيل<textarea id="jx" maxlength="300"></textarea></label>
+      <label>رقم التليفون<input id="jp" required inputmode="tel" maxlength="20"></label>
+      <label>المكان<input id="jpl" maxlength="100"></label>
+      <button class="btn" type="submit">نشر الوظيفة</button>
+    </form>
+    <div id="jlist"></div>
+  </section>
+  <section id="tg" class="hide"><div id="glist"></div></section>
   <section id="ts" class="hide"><div id="stats"></div><div class="row"><button class="btn s" id="exp" type="button">تصدير مقدمي الخدمة CSV</button></div></section>
 
   <section id="ta" class="hide">
@@ -296,7 +310,7 @@ $("csend").addEventListener("click",function(){
 $("tabs").addEventListener("click",function(e){
   var b=e.target.closest("button[data-t]");if(!b)return;tab=b.getAttribute("data-t");
   Array.prototype.forEach.call($("tabs").children,function(c){c.setAttribute("aria-pressed",String(c===b))});
-  ["p","r","c","a","s","o","m","u","e","l"].forEach(function(k){$("t"+k).classList.toggle("hide",k!==tab)});
+  ["p","r","c","a","s","o","m","u","e","l","j","g"].forEach(function(k){$("t"+k).classList.toggle("hide",k!==tab)});
   if(tab!=="c"){clearInterval(timer)}
 });
 
@@ -325,7 +339,7 @@ $("imp").addEventListener("click",function(){
 });
 
 function badges(){
-  var L={p:["مقدمو الخدمة",items.filter(function(x){return !x.on}).length],r:["التقييمات",revs.filter(function(x){return !x.on}).length],o:["الطلبات",orders.filter(function(x){return x.st==="جديد"}).length],m:["العروض",offers.filter(function(x){return !x.on}).length],u:["مقترحات",suggestions.length],c:["المحادثات",chats.filter(function(x){return x.from==="user"}).length],l:["مفقودات",lostf.filter(function(x){return !x.on}).length]};
+  var L={p:["مقدمو الخدمة",items.filter(function(x){return !x.on}).length],r:["التقييمات",revs.filter(function(x){return !x.on}).length],o:["الطلبات",orders.filter(function(x){return x.st==="جديد"}).length],m:["العروض",offers.filter(function(x){return !x.on}).length],u:["مقترحات",suggestions.length],c:["المحادثات",chats.filter(function(x){return x.from==="user"}).length],l:["مفقودات",lostf.filter(function(x){return !x.on}).length],j:["الوظائف",jobs.filter(function(x){return !x.on}).length],g:["استشارات تقنية",tech.filter(function(x){return !x.done}).length]};
   Array.prototype.forEach.call($("tabs").children,function(b){var l=L[b.getAttribute("data-t")];if(l)b.textContent=l[0]+(l[1]?" ("+l[1]+")":"")});
 }
 function renderS(){
@@ -351,6 +365,8 @@ function loadX(){loadY();
   runQ("",{from:[{collectionId:"orders"}],limit:500}).then(function(ds){orders=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),pn:sv(f,"pn"),cn:sv(f,"cn"),cp:sv(f,"cp"),ca:sv(f,"ca"),x:sv(f,"x"),pr:nv(f,"pr")||0,fee:nv(f,"fee")||15,st:sv(f,"st")||"جديد",t:sv(f,"t")}}).sort(byT);renderO();badges()}).catch(function(){});
   runQ("",{from:[{collectionId:"offers"}],limit:500}).then(function(ds){offers=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),n:sv(f,"n"),pr:nv(f,"pr")||0,d:sv(f,"d"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderK();badges()}).catch(function(){});
   runQ("",{from:[{collectionId:"lostfound"}],limit:500}).then(function(ds){lostf=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),k:sv(f,"k"),ti:sv(f,"ti"),x:sv(f,"x"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderL();badges()}).catch(function(){});
+  runQ("",{from:[{collectionId:"jobs"}],limit:500}).then(function(ds){jobs=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),ti:sv(f,"ti"),co:sv(f,"co"),x:sv(f,"x"),p:sv(f,"p"),pl:sv(f,"pl"),t:sv(f,"t"),on:!!(f.approved&&f.approved.booleanValue)}}).sort(byT);renderJ();badges()}).catch(function(){});
+  runQ("",{from:[{collectionId:"tech"}],limit:500}).then(function(ds){tech=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),p:sv(f,"p"),ty:sv(f,"ty"),x:sv(f,"x"),t:sv(f,"t"),done:!!(f.done&&f.done.booleanValue)}}).sort(byT);renderG();badges()}).catch(function(){});
 }
 var STS=["جديد","جاري التوصيل","تم التسليم","ملغي"];
 function renderO(){
@@ -387,6 +403,31 @@ function renderL(){
 }
 $("llist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=lostf.filter(function(i){return i.id===id})[0];
   if(b.getAttribute("data-a")==="del"){delDoc("/lostfound/"+id,"حذف نهائيًا؟",loadX);return}say("جاري التنفيذ...");patch("/lostfound/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderL();badges()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
+var jobs=[],tech=[];
+function renderJ(){
+  if(!jobs.length){$("jlist").innerHTML='<div class="box sub">لا توجد وظائف.</div>';return}
+  $("jlist").innerHTML=jobs.map(function(x){
+    return '<div class="box"><div class="row" style="justify-content:space-between"><span class="nm">'+esc(x.ti)+'</span><span class="tag'+(x.on?"":" off")+'">'+(x.on?"ظاهر":"مخفي")+'</span></div>'+
+    (x.co?'<div class="sub">🏢 '+esc(x.co)+'</div>':'')+(x.x?'<div>'+esc(x.x)+'</div>':'')+(x.pl?'<div class="sub">📍 '+esc(x.pl)+'</div>':'')+
+    '<div class="sub">'+esc(x.p)+' • '+esc(x.t.slice(0,16).replace("T"," "))+'</div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn s" data-id="'+att(x.id)+'" type="button">'+(x.on?"إخفاء":"إظهار")+'</button><button class="btn d" data-a="del" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>';
+  }).join("");
+}
+$("jlist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=jobs.filter(function(i){return i.id===id})[0];
+  if(b.getAttribute("data-a")==="del"){delDoc("/jobs/"+id,"حذف إعلان الوظيفة نهائيًا؟",loadX);return}say("جاري التنفيذ...");patch("/jobs/"+id,{approved:{booleanValue:!x.on}},["approved"]).then(function(r){if(r.ok){x.on=!x.on;say("تم.");renderJ();badges()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
+$("jf").addEventListener("submit",function(e){e.preventDefault();say("جاري النشر...");
+  api(FB+"/jobs?key="+KEY,{method:"POST",body:JSON.stringify({fields:{ti:S($("jti").value.trim(),80),co:S($("jco").value.trim(),60),x:S($("jx").value.trim(),300),p:S($("jp").value.trim(),20),pl:S($("jpl").value.trim(),100),t:S(new Date().toISOString(),40),approved:{booleanValue:true}}})}).then(function(r){if(r.ok){$("jf").reset();say("تم نشر الوظيفة.");loadX()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
+function renderG(){
+  if(!tech.length){$("glist").innerHTML='<div class="box sub">لا توجد طلبات استشارة.</div>';return}
+  $("glist").innerHTML=tech.map(function(x){
+    return '<div class="box"><div class="row" style="justify-content:space-between"><span class="nm">'+esc(x.ty||"استشارة تقنية")+'</span><span class="tag'+(x.done?"":" wait")+'">'+(x.done?"تم الرد":"جديد")+'</span></div>'+
+    '<div><b>'+esc(x.n)+'</b> • <a href="tel:'+att(x.p)+'">'+esc(x.p)+'</a></div>'+(x.x?'<div>'+esc(x.x)+'</div>':'')+
+    '<div class="sub">'+esc(x.t.slice(0,16).replace("T"," "))+'</div>'+
+    '<div class="row" style="margin-top:8px"><button class="btn s" data-id="'+att(x.id)+'" type="button">'+(x.done?"إلغاء تم الرد":"تم الرد")+'</button><button class="btn d" data-a="del" data-id="'+att(x.id)+'" type="button">حذف</button></div></div>';
+  }).join("");
+}
+$("glist").addEventListener("click",function(e){var b=e.target.closest("button[data-id]");if(!b)return;var id=b.getAttribute("data-id"),x=tech.filter(function(i){return i.id===id})[0];
+  if(b.getAttribute("data-a")==="del"){delDoc("/tech/"+id,"حذف طلب الاستشارة نهائيًا؟",loadX);return}say("جاري التنفيذ...");patch("/tech/"+id,{done:{booleanValue:!x.done}},["done"]).then(function(r){if(r.ok){x.done=!x.done;say("تم.");renderG();badges()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})});
 function delDoc(path,msg,cb){if(!confirm(msg))return;say("جاري الحذف...");rm(FB+path).then(function(r){if(r.ok){say("تم الحذف.");cb()}else fail(r)}).catch(function(){say("تعذّر الاتصال.")})}
 function loadY(){
   runQ("",{from:[{collectionId:"suggestions"}],limit:500}).then(function(ds){suggestions=ds.map(function(d){var f=d.fields||{};return {id:d.name.split("/").pop(),n:sv(f,"n"),c:sv(f,"c"),ti:sv(f,"ti"),x:sv(f,"x"),t:sv(f,"t")}}).sort(byT);renderU();badges()}).catch(function(){});

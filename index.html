@@ -179,6 +179,29 @@ label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:700;
     <button class="btn" type="submit" id="lfsb">إرسال</button>
     <div class="sub" style="margin-top:6px">بيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
   </form>
+  <h2>💼 إعلانات وظائف</h2>
+  <div id="jobs"></div>
+  <button class="btn" id="jobb" type="button" style="width:100%;margin-top:8px">＋ أضف إعلان وظيفة</button>
+  <form id="jobf" class="box hide" style="margin-top:10px">
+    <label>المسمى الوظيفي *<input id="jti" required maxlength="80" placeholder="مثال: بائع في محل ملابس"></label>
+    <label>اسم الشركة / صاحب العمل *<input id="jco" required maxlength="60" placeholder="مثال: محل النور للملابس"></label>
+    <label>تفاصيل الوظيفة<textarea id="jx" maxlength="300" placeholder="الشروط والراتب والمواعيد وأي تفاصيل"></textarea></label>
+    <label>رقم التليفون *<input id="jp" required inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx"></label>
+    <label>المكان (اختياري)<input id="jpl" maxlength="100" placeholder="مثال: دمياط — شارع الجلاء"></label>
+    <button class="btn" type="submit" id="jobsb">إرسال الإعلان</button>
+    <div class="sub" style="margin-top:6px">إعلان الوظيفة بيظهر في الصفحة الرئيسية بعد مراجعة الإدارة.</div>
+  </form>
+  <h2>💻 استشارات تقنية</h2>
+  <p class="note">عندك فكرة موقع أو تطبيق موبايل؟ اطلب استشارة تقنية وهنرجعلك بتفاصيل التنفيذ والتكلفة. طلبك خاص ومش بيظهر للعامة.</p>
+  <button class="btn" id="tcb" type="button" style="width:100%;margin-top:8px">طلب استشارة تقنية</button>
+  <form id="tcf" class="box hide" style="margin-top:10px">
+    <label>اسمك *<input id="tcn" required maxlength="40"></label>
+    <label>رقم التليفون *<input id="tcp" required inputmode="tel" maxlength="20" placeholder="01xxxxxxxxx"></label>
+    <label>نوع الخدمة<select id="tcty"><option>تصميم موقع</option><option>تطبيق موبايل</option><option>أخرى</option></select></label>
+    <label>تفاصيل المشروع *<textarea id="tcx" required maxlength="500" placeholder="اشرح فكرتك أو المشروع باختصار"></textarea></label>
+    <button class="btn" type="submit" id="tcsb">إرسال الطلب</button>
+    <div class="sub" style="margin-top:6px">طلبك خاص وبيوصل للإدارة بس، ومش بيظهر لأي حد تاني.</div>
+  </form>
   <h2>الأقسام</h2>
   <div class="grid" id="grid"></div>
   <div class="row" style="margin-top:8px"><button class="btn s" id="gmore" type="button" style="width:100%">كل الأقسام ▾</button></div>
@@ -327,7 +350,7 @@ function withLegacy(list){
   return list.concat(LEGACY.filter(function(x){return !have[x.p.replace(/\D/g,"")]}));
 }
 
-var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],OFF=[],LF=[],loaded=PDB.length>0;
+var PDB=jget("c_p",[]),P=withLegacy(PDB.slice()),RV={},ANN=jget("c_a",[]),NUM=[],OFF=[],LF=[],JOBS=[],loaded=PDB.length>0;
 var st={cat:"",sort:"new",fav:false,q:"",page:1,all:false,me:null};
 var FAV=jget("fav",[]),timer=null,pend={lat:null,lng:null};
 var PAGE=15;
@@ -367,6 +390,9 @@ function loadAll(){
   runQ("",onlyOn("lostfound",100)).then(function(ds){
     LF=ds.map(function(d){var f=d.fields||{};return {k:sv(f,"k"),ti:sv(f,"ti"),x:sv(f,"x"),cn:sv(f,"cn"),p:sv(f,"p"),img:sv(f,"img"),t:sv(f,"t")}});
   }).catch(function(){}).then(renderLF);
+  runQ("",onlyOn("jobs",100)).then(function(ds){
+    JOBS=ds.map(function(d){var f=d.fields||{};return {ti:sv(f,"ti"),co:sv(f,"co"),x:sv(f,"x"),p:sv(f,"p"),pl:sv(f,"pl"),t:sv(f,"t")}});
+  }).catch(function(){}).then(renderJobs);
 }
 function skel(n){var h="";for(var i=0;i<n;i++)h+='<div class="skel"></div>';return h}
 
@@ -702,6 +728,44 @@ $("lff").addEventListener("submit",function(e){
   b.disabled=true;
   post("/lostfound",{k:S($("lfk").value,10),ti:S($("lfti").value.trim(),80),x:S($("lfx").value.trim(),300),cn:S($("lfcn").value.trim(),60),p:S(ph,20),img:S(lfimg,200000),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
     if(r.ok){ls("lastLF",String(Date.now()));toast("تم الاستلام ✅ هيظهر بعد مراجعة الإدارة");$("lff").reset();lfimg="";$("lfimgp").style.display="none";$("lff").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
+});
+
+/* إعلانات الوظائف */
+function renderJobs(){
+  var a=JOBS.slice().sort(function(m,n){return m.t<n.t?1:-1}).slice(0,10);
+  $("jobs").innerHTML=a.length?a.map(function(x){
+    return '<div class="ann"><div class="ty">💼 وظيفة</div><div class="ti">'+esc(x.ti)+'</div>'+
+    (x.co?'<div class="sub">🏢 '+esc(x.co)+'</div>':'')+
+    (x.x?'<div>'+esc(x.x)+'</div>':'')+
+    (x.pl?'<div class="sub">📍 '+esc(x.pl)+'</div>':'')+
+    '<div class="row" style="margin-top:8px"><a class="btn" href="tel:'+esc(x.p)+'">اتصل</a>'+(x.p?'<span class="sub">'+esc(x.p)+'</span>':'')+'</div></div>';
+  }).join(""):'<div class="sub">لا توجد وظائف معلنة حاليًا — كن أول من يعلن عن وظيفة.</div>';
+}
+$("jobb").addEventListener("click",function(){$("jobf").classList.toggle("hide")});
+$("jobf").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("jobsb");
+  var ph=$("jp").value.trim();
+  if(ph.replace(/\D/g,"").length<8){toast("اكتب رقم تليفون صحيح.");return}
+  if(Date.now()-(+ls("lastJob")||0)<60000){toast("انتظر دقيقة قبل إرسال إعلان آخر.");return}
+  b.disabled=true;
+  post("/jobs",{ti:S($("jti").value.trim(),80),co:S($("jco").value.trim(),60),x:S($("jx").value.trim(),300),p:S(ph,20),pl:S($("jpl").value.trim(),100),approved:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastJob",String(Date.now()));toast("تم استلام إعلان الوظيفة ✅ هيظهر بعد مراجعة الإدارة");$("jobf").reset();$("jobf").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
+    b.disabled=false;
+  }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
+});
+
+/* الاستشارات التقنية */
+$("tcb").addEventListener("click",function(){$("tcf").classList.toggle("hide")});
+$("tcf").addEventListener("submit",function(e){
+  e.preventDefault();var b=$("tcsb");
+  var ph=$("tcp").value.trim();
+  if(ph.replace(/\D/g,"").length<8){toast("اكتب رقم تليفون صحيح.");return}
+  if(Date.now()-(+ls("lastTech")||0)<60000){toast("انتظر دقيقة قبل إرسال طلب آخر.");return}
+  b.disabled=true;
+  post("/tech",{n:S($("tcn").value.trim(),40),p:S(ph,20),ty:S($("tcty").value,30),x:S($("tcx").value.trim(),500),done:{booleanValue:false},t:S(now(),40)}).then(function(r){
+    if(r.ok){ls("lastTech",String(Date.now()));toast("تم استلام طلبك ✅ هيتم التواصل معاك على رقمك");$("tcf").reset();$("tcf").classList.add("hide")}else toast("تعذّر الإرسال، حاول لاحقًا.");
     b.disabled=false;
   }).catch(function(){toast("تعذّر الاتصال.");b.disabled=false});
 });

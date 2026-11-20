@@ -91,6 +91,28 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // إعلانات الوظائف
+    match /jobs/{id} {
+      allow read: if isAdmin() || resource.data.approved == true;
+      allow create: if isAdmin() || (
+        d().approved == false &&
+        d().keys().hasOnly(['ti','co','x','p','pl','t','approved']) &&
+        d().ti is string && d().ti.size() > 0 && d().ti.size() <= 80 &&
+        d().co.size() <= 60 && d().x.size() <= 300 && d().p.size() <= 20 &&
+        d().pl.size() <= 100);
+      allow update, delete: if isAdmin();
+    }
+
+    // الاستشارات التقنية (خاصة — الإدارة فقط)
+    match /tech/{id} {
+      allow create: if d().done == false &&
+        d().keys().hasOnly(['n','p','ty','x','done','t']) &&
+        d().n is string && d().n.size() > 0 && d().n.size() <= 40 &&
+        d().p.size() <= 20 && d().ty is string && d().ty.size() <= 30 &&
+        d().x.size() <= 500;
+      allow read, update, delete: if isAdmin();
+    }
+
     // الأرقام المهمة
     match /numbers/{id} {
       allow read: if isAdmin() || resource.data.approved == true;

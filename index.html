@@ -368,7 +368,6 @@ function cardHtml(x){
   '<div class="sub">'+esc(x.c)+(x.a?' • '+esc(x.a):'')+km+'</div>'+
   '<div class="sub">'+(a.c?'<span class="st">'+stars(a.a)+'</span> '+a.a.toFixed(1)+' ('+a.c+')':'لا توجد تقييمات بعد')+'</div></div>'+
   '<button class="heart'+(fv?' on':'')+'" data-fav="'+esc(x.id)+'" type="button" aria-label="مفضلة">'+(fv?'♥':'♡')+'</button>'+
-  '<a class="btn s" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(x.n+" - "+x.c+"\n📞 "+x.p+"\n"+SITE)+'" data-stop="1">مشاركة</a>'+
   '<a class="btn" href="tel:'+esc(x.p)+'" data-stop="1">اتصل</a></div></div>';
 }
 function byNew(a,b){return a.t<b.t?1:a.t>b.t?-1:0}

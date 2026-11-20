@@ -8,13 +8,13 @@
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F5F1E8;--card:#fff;--ink:#0A1F3D;--mute:#4C5F7A;--line:#E6DFD0;--g:#0A3D8F;--g2:#1256B8;--gt:#fff;--o:#F5C518;--ot:#0A1F3D;--chip:#E3EBF7;--star:#E0A100;--red:#B3261E;--sh:0 2px 10px rgba(10,31,61,.08);box-sizing:border-box}
-@media (prefers-color-scheme:dark){:root{--bg:#081426;--card:#0F2242;--ink:#EEF3F0;--mute:#A9BCB4;--line:#1C3A66;--g:#1256B8;--g2:#2E74D6;--chip:#14294D;--star:#F2B93B;--red:#F2766D;--sh:0 2px 10px rgba(0,0,0,.35);color-scheme:dark}}
+:root{--bg:#F5F1E8;--card:#fff;--ink:#0A1F3D;--mute:#4C5F7A;--line:#E6DFD0;--g:#0A3D8F;--g2:#1256B8;--gt:#fff;--o:#F5C518;--ot:#0A1F3D;--chip:#E3EBF7;--star:#E0A100;--red:#B3261E;--sh:0 2px 10px rgba(10,31,61,.08);--pat:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27140%27%20height%3D%27140%27%20viewBox%3D%270%200%20140%20140%27%3E%3Cg%20fill%3D%27rgba%2810%2C61%2C143%2C0.055%29%27%3E%3Cpath%20d%3D%27M68%2034%20L68%2078%20L40%2078%20Z%27%2F%3E%3Cpath%20d%3D%27M74%2046%20L74%2078%20L98%2078%20Z%27%2F%3E%3Cpath%20d%3D%27M34%2084%20L106%2084%20L97%2094%20L43%2094%20Z%27%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%27M14%20110%20q10%20-8%2020%200%20t20%200%20t20%200%20t20%200%20t20%200%27%20fill%3D%27none%27%20stroke%3D%27rgba%28245%2C197%2C24%2C0.10%29%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root{--bg:#081426;--card:#0F2242;--ink:#EEF3F0;--mute:#A9BCB4;--line:#1C3A66;--g:#1256B8;--g2:#2E74D6;--chip:#14294D;--star:#F2B93B;--red:#F2766D;--sh:0 2px 10px rgba(0,0,0,.35);--pat:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27140%27%20height%3D%27140%27%20viewBox%3D%270%200%20140%20140%27%3E%3Cg%20fill%3D%27rgba%28255%2C255%2C255%2C0.045%29%27%3E%3Cpath%20d%3D%27M68%2034%20L68%2078%20L40%2078%20Z%27%2F%3E%3Cpath%20d%3D%27M74%2046%20L74%2078%20L98%2078%20Z%27%2F%3E%3Cpath%20d%3D%27M34%2084%20L106%2084%20L97%2094%20L43%2094%20Z%27%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%27M14%20110%20q10%20-8%2020%200%20t20%200%20t20%200%20t20%200%20t20%200%27%20fill%3D%27none%27%20stroke%3D%27rgba%28245%2C197%2C24%2C0.07%29%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");color-scheme:dark}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,Arial,sans-serif;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg) var(--pat);color:var(--ink);font-family:Cairo,Tahoma,Arial,sans-serif;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
 .wrap{max-width:620px;margin:0 auto;padding:0 16px 130px}
-header{background:linear-gradient(135deg,var(--g),var(--g2));color:var(--gt);margin:0 -16px;padding:20px 20px 24px;border-radius:0 0 28px 28px}
+header{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27360%27%20height%3D%27240%27%20viewBox%3D%270%200%20360%20240%27%3E%3Cg%20fill%3D%27rgba%28255%2C255%2C255%2C0.10%29%27%3E%3Cpath%20d%3D%27M176%2030%20L176%20168%20L66%20168%20Z%27%2F%3E%3Cpath%20d%3D%27M190%2066%20L190%20168%20L292%20168%20Z%27%2F%3E%3Cpath%20d%3D%27M44%20182%20L318%20182%20L292%20206%20L70%20206%20Z%27%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%27M10%20226%20q18%20-14%2036%200%20t36%200%20t36%200%20t36%200%20t36%200%20t36%200%20t36%200%20t36%200%27%20fill%3D%27none%27%20stroke%3D%27rgba%28245%2C197%2C24%2C0.35%29%27%20stroke-width%3D%275%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E") no-repeat left -36px bottom -26px / 330px auto,linear-gradient(135deg,var(--g),var(--g2));color:var(--gt);margin:0 -16px;padding:20px 20px 24px;border-radius:0 0 28px 28px}
 .top{display:flex;justify-content:space-between;align-items:center}
 h1{margin:0;font-size:25px;font-weight:800}
 header p{margin:4px 0 0;font-size:14px;opacity:.93}
@@ -95,7 +95,7 @@ label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;
 <div class="wrap">
 <header>
   <div class="top"><h1 style="margin:0;display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="46" height="46" style="flex:none;display:block" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0A3D8F"/><path d="M31 12 L31 40 L13 40 Z" fill="#ffffff"/><path d="M35 20 L35 40 L49 40 Z" fill="#ffffff"/><path d="M9 44 L55 44 L49 51 L15 51 Z" fill="#F5C518"/></svg><svg viewBox="0 0 300 58" width="230" height="44" role="img" aria-label="دليل دمياط" style="display:block"><text x="150" y="36" text-anchor="middle" direction="rtl" font-family="Cairo,Tahoma,Arial,sans-serif" font-size="33" font-weight="800"><tspan fill="#ffffff">دليل</tspan><tspan fill="#F5C518"> دمياط</tspan></text><rect x="112" y="46" width="76" height="4" rx="2" fill="#F5C518"/><circle cx="196" cy="48" r="3" fill="#ffffff"/></svg></h1></div>
-  <p>دليلك اليومي لكل خدمات البلد</p>
+  <p>دليلك اليومي لكل خدمات المحافظة</p>
 </header>
 
 <main id="v_home">

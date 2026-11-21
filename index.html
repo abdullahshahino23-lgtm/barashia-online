@@ -117,12 +117,19 @@ label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:700;
 .wordmark span{color:#F5C518}
 .brand .bwave{width:min(62%,300px);height:14px;display:block;margin:2px auto 0}
 header p{text-align:center}
+
+.admbtn{position:absolute;top:14px;inset-inline-end:14px;z-index:3;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.45);border-radius:50%;box-shadow:0 4px 12px rgba(4,20,48,.25);transition:transform .12s ease,background .15s ease}
+.admbtn:active{transform:scale(.92)}
+@media (hover:hover){.admbtn:hover{background:rgba(255,255,255,.28)}}
+.admlink{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border-radius:99px;background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;box-shadow:0 4px 12px rgba(10,61,143,.25);transition:transform .12s ease}
+.admlink:active{transform:scale(.96)}
 </style>
 </head>
 <body>
 <div id="toast" role="status" aria-live="polite"></div>
 <div class="wrap">
 <header>
+  <a class="admbtn" href="admin.html" aria-label="لوحة التحكم" title="لوحة التحكم">🔐</a>
   <div class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0A3D8F"/><circle cx="32" cy="32" r="28.5" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><path d="M31 12 L31 40 L13 40 Z" fill="#ffffff"/><path d="M35 20 L35 40 L49 40 Z" fill="#ffffff"/><path d="M9 44 L55 44 L49 51 L15 51 Z" fill="#F5C518"/></svg><h1 class="wordmark">دليل <span>دمياط</span></h1><svg class="bwave" viewBox="0 0 240 14" aria-hidden="true"><path d="M4 8 q14 -8 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0" fill="none" stroke="#F5C518" stroke-width="3.5" stroke-linecap="round"/></svg></div>
   <p>دليلك اليومي لكل خدمات المحافظة</p>
 </header>
@@ -219,7 +226,7 @@ header p{text-align:center}
     <div>للتواصل مع إدارة التطبيق واتساب</div>
     <div dir="ltr" style="font-weight:800;font-size:18px;color:var(--ink)">01050766025</div>
     <a class="btn w" style="margin-top:8px" href="https://wa.me/201050766025" target="_blank" rel="noopener">تواصل على واتساب</a>
-    <div style="margin-top:12px"><a href="admin.html" style="color:var(--mute)">لوحة التحكم</a> · <a href="PRIVACY.html" style="color:var(--mute)">سياسة الخصوصية</a></div>
+    <div style="margin-top:12px"><a class="admlink" href="admin.html">🔐 لوحة التحكم</a> · <a href="PRIVACY.html" style="color:var(--mute)">سياسة الخصوصية</a></div>
   </footer>
 </main>
 
